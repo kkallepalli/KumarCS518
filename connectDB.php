@@ -4,8 +4,8 @@
 // $dbpass = 'kumar';
 // $dbname = 'RecipeStack';
 $dbhost = 'localhost';
-$dbuser = 'admin';
-$dbpass = 'M0n@rch$';
+$dbuser = 'root';
+$dbpass = '';
 $dbname = 'RecipeStack';
 
 $conn = mysql_connect($dbhost, $dbuser, $dbpass) or die('Error connecting to mysql');

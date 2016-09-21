@@ -1,7 +1,10 @@
+<?php 
+session_start();
+?>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>StackExchange</title>
+<title>Stack Exchange</title>
 <link rel="stylesheet" href="css/bootstrap.min.css">
 <link href="http://fonts.googleapis.com/css?family=Montserrat"
 	rel="stylesheet" type="text/css">
@@ -48,6 +51,12 @@ function createPost()
 {
 	$("#myPostModal").modal('hide');
 }
+function showLogout()
+{
+	$("#postLink").hide();
+	$("#loginLink").hide();
+	$("#logoutLink").show();
+	}
 </script>
 </head>
 <body>
@@ -64,8 +73,9 @@ function createPost()
 				<li><a href="#">Month</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
-				<li><a data-toggle="modal" data-target="#myPostModal">Post</a></li>
-				<li><a data-toggle="modal" data-target="#myModal">Login</a></li>
+			<li id='postLink'><a data-toggle='modal' data-target='#myPostModal'>Post</a></li>
+			<li id='loginLink'><a data-toggle='modal' data-target='#myModal'>Login</a></li>
+			<li id='logoutLink' style="display: none;"><a href="logout.php">Logout</a></li>
 			</ul>
 		</div>
 	</nav>
@@ -121,6 +131,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	$rs = mysql_query ( $sql );
 	while ( $row = mysql_fetch_array ( $rs ) ) {
 		$uid = $row ["uid"];
+		echo "<script type='text/javascript'>showLogout();</script>";
 		showTopPosts ();
 	}
 	
