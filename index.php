@@ -47,13 +47,28 @@ session_start();
 }
 </style>
 <script type="text/javascript">
+var uname="";
 function createPost()
 {
+	//alert("uname:"+uname+"title"+$("#postTitle").val());
+	var postData = "uname="+ uname+"&title="+$("#postTitle").val()+"&content="+$("#postContent").val();
+    $.ajax({
+          type: "post",
+          url: "services/CreatePost.php",
+          data: postData,
+          contentType: "application/x-www-form-urlencoded",
+          success: function(responseData, textStatus, jqXHR) {
+              alert("data saved  :"+responseData);
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+              console.log(errorThrown);
+          }
+      });
 	$("#myPostModal").modal('hide');
 }
 function showLogout()
 {
-	$("#postLink").hide();
+	$("#postLink").show();
 	$("#loginLink").hide();
 	$("#logoutLink").show();
 	}
@@ -73,8 +88,8 @@ function showLogout()
 				<li><a href="#">Month</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
-			<li id='postLink'><a data-toggle='modal' data-target='#myPostModal'>Post</a></li>
 			<li id='loginLink'><a data-toggle='modal' data-target='#myModal'>Login</a></li>
+			<li id='postLink' style="display: none;"><a data-toggle='modal' data-target='#myPostModal'>Post</a></li>
 			<li id='logoutLink' style="display: none;"><a href="logout.php">Logout</a></li>
 			</ul>
 		</div>
@@ -84,11 +99,14 @@ function showLogout()
 		<div class="col-sm-6 w3-card-2">
 <?php
 require_once 'connectDB.php';
-function showTopPosts() {
-	for($x = 0; $x <= 5; $x ++) {
+function showTopPosts($uid) {
+	$sql="select * from Question where uid=".$uid."";
+	$rs = mysql_query ( $sql );
+	$x = 0;
+	while ( $row = mysql_fetch_array ( $rs ) ) {
 		$postinfo = "<div class='w3-card-2 w3-hover-shadow' data-toggle='collapse' data-target='#collapse" . ($x + 1) . "' style='border-left: 4px solid #009688;'><div class='row post'>
 		<div class='col-sm-8'>
-			<p class='title'>Why is PHP called Hypertest Preprocessor why not Personal Home Page ?</p> 
+			<p class='title'>".$row['QTitle']."</p> 
 			<p>
  			<button type='button' class='btn btn-info'>Php</button>
  		<button type='button' class='btn btn-primary'>Technology</button>
@@ -114,27 +132,29 @@ function showTopPosts() {
 		$postinfo = $postinfo . "</div></div></div>";
 		
 		echo $postinfo;
+		$x= $x+1;
 	}
 }
 
 if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	$uname = "";
+	$pwd="";
 	if (empty ( $_POST ["email"] )) {
 		$nameErr = "username is required";
 	} else {
-		$uname = mysql_real_escape_string ( $_POST ["email"] );
+		$uname = escapeStr($_POST ["email"]) ;
 	}
+	$pwd= escapeStr($_POST ["pwd"] ) ;
 	
-	$sql = "SELECT * FROM user WHERE username='" . $_POST ["email"] . "' and password='" . $_POST ["pwd"] . "'";
-	// echo $sql;
+	$sql ="SELECT * FROM user WHERE username='" . $_POST ["email"] . "' and password='" . $pwd. "'";
 	$uid = 0;
-	$rs = mysql_query ( $sql );
+	$rs = mysql_query ( $sql ) or die("sql error".mysql_error());
 	while ( $row = mysql_fetch_array ( $rs ) ) {
 		$uid = $row ["uid"];
-		echo "<script type='text/javascript'>showLogout();</script>";
-		showTopPosts ();
+		echo "<script type='text/javascript'>uname=".$uid.";showLogout();</script>";
+		showTopPosts ($uid);
 	}
-	
+
 	if ($uid == 0) {
 		echo "<script type='text/javascript'>alert('Username or password doesnt match');</script>";
 	}
@@ -173,7 +193,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 							action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>"
 							method="post">
 							<div class="form-group">
-								<label for="email">Email address:</label> <input type="email"
+								<label for="email">Email address:</label> <input type="text"
 									class="form-control" name="email" id="email"><span
 									class="error">* <?php echo $emailError;?></span>
 							</div>

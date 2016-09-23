@@ -1,13 +1,20 @@
 <?php
 require_once '../connectDB.php';
+$qid=0;
 if ($_SERVER ['REQUEST_METHOD'] == "POST") {
-	$sql = "SELECT * FROM user WHERE username='kkall002@odu.edu' and password='1234'";
+	$title=$_POST["title"];
+	$content=$_POST["content"];
+	$uid=$_POST["uname"];
+	$sql = "INSERT INTO Question(QTitle, QContent, uid, created_date, views) VALUES ('".$title."','".$content."','".$uid."','".date("Y-m-d h:i:sa ")."',0)";
 	echo $sql;
-	$uid = 0;
-	$rs = mysql_query ( $sql );
-	while ( $row = mysql_fetch_array ( $rs ) ) {
-		$uid = $row ["uid"];
-		echo $uid;
+	if ($conn->query($sql)==TRUE)
+	{
+	$qid=$conn->insert_id;
+	echo $qid;
 	}
+	else{
+		echo "sql error";
+	}
+
 }
 ?>
