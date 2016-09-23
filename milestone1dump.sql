@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 22, 2016 at 11:20 PM
+-- Generation Time: Sep 23, 2016 at 03:40 PM
 -- Server version: 10.0.19-MariaDB-1~trusty-log
 -- PHP Version: 5.5.9-1ubuntu4.9
 
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `Question` (
   `uid` int(11) NOT NULL,
   `created_date` date NOT NULL,
   `views` int(200) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `Question`
@@ -60,7 +60,10 @@ CREATE TABLE IF NOT EXISTS `Question` (
 
 INSERT INTO `Question` (`Qid`, `QTitle`, `QContent`, `uid`, `created_date`, `views`) VALUES
 (1, 'How to make a sandwich?', 'Please tell me how to make a sandwich in 5 mins', 1, '2016-09-22', 0),
-(2, 'How to make a chocolate cake', 'Do we make chocolate cake with chocolates?', 1, '2016-09-22', 0);
+(2, 'How to make a chocolate cake', 'Do we make chocolate cake with chocolates?', 1, '2016-09-22', 0),
+(3, 'Crisp Roasted Potatoes', 'How to make crisp roasted potatoes in microwave', 2, '2016-09-23', 0),
+(4, 'Re chill wine', 'Can you re chill wine?', 1, '2016-09-23', 0),
+(5, 'Samosa', 'How to make samosa', 1, '2016-09-23', 0);
 
 -- --------------------------------------------------------
 
@@ -151,7 +154,7 @@ ALTER TABLE `Votes`
 -- AUTO_INCREMENT for table `Question`
 --
 ALTER TABLE `Question`
-  MODIFY `Qid` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
+  MODIFY `Qid` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=6;
 --
 -- AUTO_INCREMENT for table `user`
 --

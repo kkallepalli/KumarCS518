@@ -1,5 +1,5 @@
-<?php 
-session_start();
+<?php
+session_start ();
 ?>
 <html>
 <head>
@@ -32,18 +32,20 @@ session_start();
 .error {
 	color: #FF0000;
 }
+
 .footer-line {
-    margin-top: 40px;
-    text-align: center;
-    background: #404040;
-    width: 100%;
-    float: left;
+	margin-top: 40px;
+	text-align: center;
+	background: #404040;
+	width: 100%;
+	float: left;
 }
+
 .footer-line p {
-    line-height: 58px;
-    margin-bottom: 0px;
-    font-size: 14px;
-    color: #fff;
+	line-height: 58px;
+	margin-bottom: 0px;
+	font-size: 14px;
+	color: #fff;
 }
 </style>
 <script type="text/javascript">
@@ -52,6 +54,7 @@ function createPost()
 {
 	//alert("uname:"+uname+"title"+$("#postTitle").val());
 	var postData = "uname="+ uname+"&title="+$("#postTitle").val()+"&content="+$("#postContent").val();
+	alert("post data:"+postData);
     $.ajax({
           type: "post",
           url: "services/CreatePost.php",
@@ -71,7 +74,7 @@ function showLogout()
 	$("#postLink").show();
 	$("#loginLink").hide();
 	$("#logoutLink").show();
-	}
+}
 </script>
 </head>
 <body>
@@ -88,28 +91,35 @@ function showLogout()
 				<li><a href="#">Month</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
-			<li id='loginLink'><a data-toggle='modal' data-target='#myModal'>Login</a></li>
-			<li id='postLink' style="display: none;"><a data-toggle='modal' data-target='#myPostModal'>Post</a></li>
-			<li id='logoutLink' style="display: none;"><a href="logout.php">Logout</a></li>
+				<li id='loginLink'><a data-toggle='modal' data-target='#myModal'>Login</a></li>
+				<li id='postLink' style="display: none;"><a data-toggle='modal'
+					data-target='#myPostModal'>Post</a></li>
+				<li id='logoutLink' style="display: none;"><a href="logout.php">Logout</a></li>
 			</ul>
 		</div>
 	</nav>
 
-	<div class="row" style="margin-left: 0px;">
+	<div class="row" style="margin-left: 0px;margin-right: 0px;">
 		<div class="col-sm-6 w3-card-2">
 <?php
-require_once 'connectDB.php';
+include ("connectDB.php");
 function showTopPosts($uid) {
-	$sql="select * from Question where uid=".$uid."";
-	$rs = mysql_query ( $sql );
+	$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
+	OR die ('Could not connect to MySQL: '.mysql_error());
+	$sql1 = "SELECT *  FROM Question where uid=1";
+	if(!$conn)
+	{
+		echo "error";
+	}
+	$rs1 = mysqli_query($conn,$sql1);
 	$x = 0;
-	while ( $row = mysql_fetch_array ( $rs ) ) {
+	echo "Rows:".mysqli_num_rows($rs1) ;
+	while ( $row = mysqli_fetch_assoc ( $rs1 ) ) {
 		$postinfo = "<div class='w3-card-2 w3-hover-shadow' data-toggle='collapse' data-target='#collapse" . ($x + 1) . "' style='border-left: 4px solid #009688;'><div class='row post'>
 		<div class='col-sm-8'>
-			<p class='title'>".$row['QTitle']."</p> 
+			<p class='title'>" . $row [1] . "</p> 
 			<p>
- 			<button type='button' class='btn btn-info'>Php</button>
- 		<button type='button' class='btn btn-primary'>Technology</button>
+ 			<button type='button' class='btn btn-info'>Cake</button>
  			</p>
 		</div>
 		<div class='col-sm-3'>
@@ -121,7 +131,7 @@ function showTopPosts($uid) {
 		</div>
   		<div class='col-sm-1'><p>Posted by: Kumar</p></div>
   		</div>
-		<div id='collapse" . ($x + 1) . "' class='post-footer collapse'><div class='list-group'>";
+		<div id='collapse".($x + 1) ."' class='post-footer collapse'><div class='list-group'>";
 		
 		$ans = rand ( 0, 3 );
 		
@@ -132,29 +142,33 @@ function showTopPosts($uid) {
 		$postinfo = $postinfo . "</div></div></div>";
 		
 		echo $postinfo;
-		$x= $x+1;
+		$x = $x + 1;
 	}
+	mysqli_close($conn);
 }
 
 if ($_SERVER ['REQUEST_METHOD'] == "POST") {
+	$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
+	OR die ('Could not connect to MySQL: '.mysql_error());
 	$uname = "";
-	$pwd="";
+	$pwd = "";
 	if (empty ( $_POST ["email"] )) {
 		$nameErr = "username is required";
 	} else {
-		$uname = escapeStr($_POST ["email"]) ;
+		$uname = escapeStr ( $conn,$_POST ["email"] );
 	}
-	$pwd= escapeStr($_POST ["pwd"] ) ;
-	
-	$sql ="SELECT * FROM user WHERE username='" . $_POST ["email"] . "' and password='" . $pwd. "'";
+	$pwd = escapeStr ($conn,$_POST ["pwd"] );
+	$sql = "SELECT * FROM user WHERE username='" . $_POST ["email"] . "' and password='" . $pwd . "'";
 	$uid = 0;
-	$rs = mysql_query ( $sql ) or die("sql error".mysql_error());
-	while ( $row = mysql_fetch_array ( $rs ) ) {
+	$rs = mysqli_query ( $conn,$sql );
+	while ( $row = mysqli_fetch_assoc ( $rs ) ) {
 		$uid = $row ["uid"];
-		echo "<script type='text/javascript'>uname=".$uid.";showLogout();</script>";
-		showTopPosts ($uid);
+		echo "<script type='text/javascript'>uname=" . $uid . ";showLogout();</script>";
+		showTopPosts($uid);
 	}
 
+	mysqli_close($conn);
+	
 	if ($uid == 0) {
 		echo "<script type='text/javascript'>alert('Username or password doesnt match');</script>";
 	}
@@ -165,8 +179,53 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 		<div class="col-sm-6">
 			<div class="row">
 				<div class="panel panel-info">
-					<div class="panel-heading">Top Questions</div>
-					<div class="panel-body" style="height: 40vh;"></div>
+					<div class="panel-heading">My Questions</div>
+					<div id="myQuesHolder" class="panel-body" style="height: 60vh;overflow:scroll;">
+					<?php
+					if ($_SERVER ['REQUEST_METHOD'] == "POST") {
+						if ($uid != 0) {
+							$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
+							OR die ('Could not connect to MySQL: '.mysql_error());
+							$sql = "select * from Question where uid=".$uid."";
+							$rs = mysqli_query ($conn,$sql );
+							$x = 0;
+							while ( $row = mysqli_fetch_assoc ( $rs ) ) {
+								$postinfo = "<div class='w3-card-2 w3-hover-shadow' data-toggle='collapse' data-target='#mycollapse" . ($x + 1) . "' style='border-left: 4px solid #009688;'><div class='row post'>
+								<div class='col-sm-8'>
+									<p class='title'>" .$row ['QTitle'] ."</p> 
+									<p>
+						 			<button type='button' class='btn btn-info'>Php</button>
+						 		<button type='button' class='btn btn-primary'>Technology</button>
+						 			</p>
+								</div>
+								<div class='col-sm-3'>
+								<ul class='w3-ul'>
+								<li><a href='#'>Votes <span class='badge'>" . rand ( 0, 20 ) . "</span></a></li>
+								<li><a href='#'>Answers <span class='badge'>" . rand ( 0, 20 ) . "</span></a></li>
+								<li><a href='#'>Views <span class='badge'>" . rand ( 0, 20 ) . "</span></a></li>
+								</ul>
+								</div>
+						  		<div class='col-sm-1'><p>Posted by: Kumar</p></div>
+						  		</div>
+								<div id='mycollapse" . ($x + 1) . "' class='post-footer collapse'><div class='list-group'>";
+								
+								$ans = rand ( 0, 3 );
+								
+								for($y = 0; $y <= $ans; $y ++) {
+									$postinfo = $postinfo . "<a href='#' class='list-group-item'>Your first answer goes here!!</a>";
+								}
+								
+								$postinfo = $postinfo . "</div></div></div>";
+								
+								echo $postinfo;
+								$x = $x + 1;
+							}
+						}
+
+						mysqli_close($conn);
+					}
+					?>
+					</div>
 
 				</div>
 			</div>
@@ -227,8 +286,9 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 							class="form-control" name="postTitle" id="postTitle">
 					</div>
 					<div class="form-group">
-						<label for="postContent">Content:</label> 
-						 <textarea class="form-control" rows="5" id="postContent" name="postContent"></textarea>
+						<label for="postContent">Content:</label>
+						<textarea class="form-control" rows="5" id="postContent"
+							name="postContent"></textarea>
 					</div>
 					<button class="btn btn-default" onclick="createPost()">Submit</button>
 				</div>
@@ -238,7 +298,9 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	</div>
 
 
-	<div class="container footer-line"><p>Project for CS518 - Developed by Kumar,Surabhi,Satya - 2016</p></div>
+	<div class="container footer-line">
+		<p>Project for CS518 - Developed by Kumar,Surabhi,Satya - 2016</p>
+	</div>
 
 </body>
 </html>

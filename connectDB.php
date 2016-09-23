@@ -1,21 +1,14 @@
 <?php
-// $dbhost = 'handson-mysql';
-// $dbuser = 'kumar';
-// $dbpass = 'kumar';
-// $dbname = 'RecipeStack';
-$dbhost = 'localhost';
-$dbuser = 'root';
-$dbpass = '';
-$dbname = 'RecipeStack';
 
-$conn = mysql_connect($dbhost, $dbuser, $dbpass) or die('Error connecting to mysql');
-mysql_select_db($dbname);
-//echo $conn;
+define ('DB_USER', 'admin');
+define ('DB_PASSWORD', 'M0n@rch$');
+define ('DB_HOST', 'localhost');
+define ('DB_NAME', 'RecipeStack');
 
-if (!mysql_set_charset('utf8', $conn)) {
-    echo "Error: Unable to set the character set.\n";
-    exit;
-}
+//define ('DB_USER', 'kumar');
+//define ('DB_PASSWORD', 'kumar');
+//define ('DB_HOST', 'handson-mysql');
+//define ('DB_NAME', 'RecipeStack');
 
 function nvl($val, $replace)
 {
@@ -25,8 +18,8 @@ function nvl($val, $replace)
 		return $val;
 }
 
-function escapeStr($str)
+function escapeStr($conn,$str)
 {
-	return mysql_real_escape_string(nvl($str, null));
+	return mysqli_real_escape_string($conn,nvl($str, null));
 }
 ?>
