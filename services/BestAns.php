@@ -5,7 +5,7 @@ OR die ('Could not connect to MySQL: '.mysql_error());
 if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	$aid=$_POST["aid"];
 	$bestans=$_POST["bestans"];
-	$sql = "UPDATE Answers ". "SET best_ans = $bestans ". 
+	$sql = "UPDATE answers ". "SET best_ans = $bestans ". 
                "WHERE aid = $aid" ;
 	echo $sql;
 	if(mysqli_query($conn,$sql))
