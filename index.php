@@ -26,7 +26,7 @@ session_start ();
 
 .post-footer {
 	background-color: #009688;
-	color: white;
+	color: #6b6b6b;
 }
 
 .error {
@@ -45,7 +45,7 @@ session_start ();
 	line-height: 58px;
 	margin-bottom: 0px;
 	font-size: 14px;
-	color: #fff;
+	color: #6b6b6b;
 }
 </style>
 <script type="text/javascript">
@@ -106,42 +106,36 @@ include ("connectDB.php");
 function showTopPosts($uid) {
 	$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 	OR die ('Could not connect to MySQL: '.mysql_error());
-	$sql1 = "SELECT *  FROM Question where uid=1";
+	$sql1 = "SELECT qid,qtitle,qcontent,U.uid,created_date,U.username FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid;
 	if(!$conn)
 	{
 		echo "error";
 	}
 	$rs1 = mysqli_query($conn,$sql1);
 	$x = 0;
-	echo "Rows:".mysqli_num_rows($rs1) ;
 	while ( $row = mysqli_fetch_assoc ( $rs1 ) ) {
-		$postinfo = "<div class='w3-card-2 w3-hover-shadow' data-toggle='collapse' data-target='#collapse" . ($x + 1) . "' style='border-left: 4px solid #009688;'><div class='row post'>
-		<div class='col-sm-8'>
-			<p class='title'>" . $row [1] . "</p> 
-			<p>
- 			<button type='button' class='btn btn-info'>Cake</button>
- 			</p>
+		$postinfo = "<div class='w3-card-2 w3-hover-shadow' data-toggle='collapse' data-target='#collapse" . ($x + 1) . "' style='border-left: 4px solid #009688;'>
+		<div class='row post'>
+		<div class='col-sm-7'>
+			<p class='title'>" . $row ["qtitle"] . "</p> 
 		</div>
-		<div class='col-sm-3'>
-		<ul class='w3-ul'>
-		<li><a href='#'>Votes <span class='badge'>" . rand ( 0, 20 ) . "</span></a></li>
-		<li><a href='#'>Answers <span class='badge'>" . rand ( 0, 20 ) . "</span></a></li>
-		<li><a href='#'>Views <span class='badge'>" . rand ( 0, 20 ) . "</span></a></li>
-		</ul>
+		<div class='col-sm-2'>
+		<a href='#'>Votes <span class='badge'>" . rand ( 0, 20 ) . "</span></a>
+		<a href='#'>Answers <span class='badge'>" . rand ( 0, 20 ) . "</span></a>
 		</div>
-  		<div class='col-sm-1'><p>Posted by: Kumar</p></div>
+  		<div class='col-sm-3'><p style='word-wrap: break-word;'>Posted by:<br>".$row ["username"]."</p></div>
   		</div>
 		<div id='collapse".($x + 1) ."' class='post-footer collapse'><div class='list-group'>";
-		
-		$ans = rand ( 0, 3 );
-		
-		for($y = 0; $y <= $ans; $y ++) {
-			$postinfo = $postinfo . "<a href='#' class='list-group-item'>Your first answer goes here!!</a>";
+		$sql2="SELECT A.aid,A.adesc,U.username,A.best_ans FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"];
+		$rs2 = mysqli_query($conn,$sql2);
+		$y = 0;
+		while ( $row = mysqli_fetch_assoc ( $rs2 ) ) {
+			$postinfo = $postinfo . "<div class='list-group-item'>".$row["adesc"]." Answered by: ".$row["username"]."<a href='#'><img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#'><img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a></div>";
 		}
-		
+		$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='comment".($x + 1)."' onclick='event.stopPropagation()'></textarea></div>";
 		$postinfo = $postinfo . "</div></div></div>";
-		
 		echo $postinfo;
+		$y = $y + 1;
 		$x = $x + 1;
 	}
 	mysqli_close($conn);
@@ -186,13 +180,13 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 						if ($uid != 0) {
 							$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 							OR die ('Could not connect to MySQL: '.mysql_error());
-							$sql = "select * from Question where uid=".$uid."";
+							$sql = "select * from question where uid=".$uid."";
 							$rs = mysqli_query ($conn,$sql );
 							$x = 0;
 							while ( $row = mysqli_fetch_assoc ( $rs ) ) {
 								$postinfo = "<div class='w3-card-2 w3-hover-shadow' data-toggle='collapse' data-target='#mycollapse" . ($x + 1) . "' style='border-left: 4px solid #009688;'><div class='row post'>
 								<div class='col-sm-8'>
-									<p class='title'>" .$row ['QTitle'] ."</p> 
+									<p class='title'>" .$row ['qtitle'] ."</p> 
 									<p>
 						 			<button type='button' class='btn btn-info'>Php</button>
 						 		<button type='button' class='btn btn-primary'>Technology</button>
