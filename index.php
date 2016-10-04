@@ -38,14 +38,15 @@ session_start ();
 	text-align: center;
 	background: #404040;
 	width: 100%;
-	float: left;
+	position:fixed;
+	bottom:0;
 }
 
 .footer-line p {
 	line-height: 58px;
 	margin-bottom: 0px;
 	font-size: 14px;
-	color: #6b6b6b;
+	color: #FFFFFF;
 }
 </style>
 <script type="text/javascript">
@@ -69,44 +70,89 @@ function createPost()
       });
 	$("#myPostModal").modal('hide');
 }
+function saveAnswer(x,qid)
+{
+	var desc=$("#comment"+x).val();
+	var postData = "uname="+ uname+"&qid="+qid+"&adesc="+desc;
+	$.ajax({
+          type: "post",
+          url: "services/CreateAnswers.php",
+          data: postData,
+          contentType: "application/x-www-form-urlencoded",
+          success: function(responseData, textStatus, jqXHR) {
+			  location.reload();   
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+              console.log(jqXHR+":"+errorThrown);
+          }
+      });
+	$("#comment"+x).val("");
+}
+
 function showLogout()
 {
 	$("#postLink").show();
 	$("#loginLink").hide();
 	$("#logoutLink").show();
+	$("#myQuesSection").show();
+	$("#aboutUs").hide();
+	$('#myQuesSection').css('opacity', '1');
+}
+function showMyQuestions()
+{
+	if(uname=="")
+	{
+		$('#myQuesSection').css('opacity', '0');
+	}
+	else{
+		$('#myQuesSection').css('opacity', '1');
+	}
+}
+function voteQuestion(voteValue)
+{
+	
 }
 </script>
 </head>
-<body>
-	<nav class="navbar navbar-inverse">
+<body onload="showMyQuestions()">
+	<nav class="navbar navbar-inverse" style="background-color:#4d636f;color:white;">
 		<div class="container-fluid">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="#">My Heap Under Flow</a>
+				<img class="navbar-brand" src='./images/logo.png' style="padding: 5px 10px;">
 			</div>
 			<ul class="nav navbar-nav">
-				<li class="active"><a href="#">Interesting</a></li>
-				<li><a href="#">Featured</a></li>
-				<li><a href="#">Hot</a></li>
-				<li><a href="#">Week</a></li>
-				<li><a href="#">Month</a></li>
+				<li class="active" ><a href="#" style="background-color:#3a4b53;">Top Questions</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
-				<li id='loginLink'><a data-toggle='modal' data-target='#myModal'>Login</a></li>
-				<li id='postLink' style="display: none;"><a data-toggle='modal'
+				<li id='loginLink'><a data-toggle='modal' data-target='#myModal' style='cursor: hand;'>Login</a></li>
+				<li id='postLink' style="display: none;cursor:hand;"><a data-toggle='modal'
 					data-target='#myPostModal'>Post</a></li>
 				<li id='logoutLink' style="display: none;"><a href="logout.php">Logout</a></li>
 			</ul>
 		</div>
 	</nav>
+	
+	<div id="aboutUs" style="min-height:80vh;padding:10px;">
+	<img src='./images/aboutus.png' class="img-responsive">
+	
+	<div class="jumbotron" style="background-color:#dcdcdc;">
+	"One stop to get all your food related questions answered by experts. Post your questions, get answers to your questions, choose the best answer, vote answers up/down, see related questions from other members, share your thoughts by answering the questions."
 
-	<div class="row" style="margin-left: 0px;margin-right: 0px;">
+	<br>
+	Our mission is to teach and inspire food lovers across the globe by sharing talent and knowledge.
+	</div>
+	
+	<b>Get Started -  Register Now! </b>
+	</div>
+
+	<div class="row" style="margin-left: 0px;margin-right: 0px;min-height:80vh;">
 		<div class="col-sm-6 w3-card-2">
 <?php
 include ("connectDB.php");
 function showTopPosts($uid) {
 	$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 	OR die ('Could not connect to MySQL: '.mysql_error());
-	$sql1 = "SELECT qid,qtitle,qcontent,U.uid,created_date,U.username FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid;
+	$sql1 = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes FROM question Q,user U WHERE 	U.uid=Q.uid and U.uid!=".$uid;
 	if(!$conn)
 	{
 		echo "error";
@@ -114,25 +160,27 @@ function showTopPosts($uid) {
 	$rs1 = mysqli_query($conn,$sql1);
 	$x = 0;
 	while ( $row = mysqli_fetch_assoc ( $rs1 ) ) {
-		$postinfo = "<div class='w3-card-2 w3-hover-shadow' data-toggle='collapse' data-target='#collapse" . ($x + 1) . "' style='border-left: 4px solid #009688;'>
+		$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;' >
 		<div class='row post'>
 		<div class='col-sm-7'>
-			<p class='title'>" . $row ["qtitle"] . "</p> 
+			<p class='title' style='cursor: hand;' data-toggle='collapse' data-target='#collapse" . ($x + 1) . "'>" . $row ["qtitle"] . "</p> 
+			<a href='javascript:voteQuestion(1)'><img width='24px' height='24px' src='./images/ques-up.png'></a>
+			<a href='javascript:voteQuestion(-1)'><img width='24px' height='24px' src='./images/ques-down.png' ></a>
 		</div>
 		<div class='col-sm-2'>
-		<a href='#'>Votes <span class='badge'>" . rand ( 0, 20 ) . "</span></a>
-		<a href='#'>Answers <span class='badge'>" . rand ( 0, 20 ) . "</span></a>
+		<a href='#'>Votes <span class='badge'>".$row["votes"]."</span></a>
+		Answers <a href='#'><span class='badge'>" .$row["answers"]."</span></a>
 		</div>
   		<div class='col-sm-3'><p style='word-wrap: break-word;'>Posted by:<br>".$row ["username"]."</p></div>
   		</div>
 		<div id='collapse".($x + 1) ."' class='post-footer collapse'><div class='list-group'>";
-		$sql2="SELECT A.aid,A.adesc,U.username,A.best_ans FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"];
+		$sql2="SELECT A.aid,A.adesc,U.username,A.best_ans,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"];
 		$rs2 = mysqli_query($conn,$sql2);
 		$y = 0;
-		while ( $row = mysqli_fetch_assoc ( $rs2 ) ) {
-			$postinfo = $postinfo . "<div class='list-group-item'>".$row["adesc"]." Answered by: ".$row["username"]."<a href='#'><img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#'><img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a></div>";
+		while ( $ansrow = mysqli_fetch_assoc ( $rs2 ) ) {
+			$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$ansrow["username"]."</b></div><a href='#'class='col-sm-2'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-2'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a></div>";
 		}
-		$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='comment".($x + 1)."' onclick='event.stopPropagation()'></textarea></div>";
+		$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='comment".($x + 1)."' onclick='event.stopPropagation()'></textarea><input type='button' value='Submit' onclick='saveAnswer(".($x+1).",".$row["qid"].")'></div>";
 		$postinfo = $postinfo . "</div></div></div>";
 		echo $postinfo;
 		$y = $y + 1;
@@ -172,46 +220,40 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 </div>
 		<div class="col-sm-6">
 			<div class="row">
-				<div class="panel panel-info">
-					<div class="panel-heading">My Questions</div>
+				<div id="myQuesSection" style="opacity:0;" class="panel panel-info">
+					<div  class="panel-heading">My Questions</div>
 					<div id="myQuesHolder" class="panel-body" style="height: 60vh;overflow:scroll;">
 					<?php
 					if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 						if ($uid != 0) {
 							$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 							OR die ('Could not connect to MySQL: '.mysql_error());
-							$sql = "select * from question where uid=".$uid."";
+							$sql = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes FROM question Q,user U WHERE 	U.uid=Q.uid and U.uid=".$uid."";
 							$rs = mysqli_query ($conn,$sql );
 							$x = 0;
 							while ( $row = mysqli_fetch_assoc ( $rs ) ) {
 								$postinfo = "<div class='w3-card-2 w3-hover-shadow' data-toggle='collapse' data-target='#mycollapse" . ($x + 1) . "' style='border-left: 4px solid #009688;'><div class='row post'>
-								<div class='col-sm-8'>
+								<div class='col-sm-7'>
 									<p class='title'>" .$row ['qtitle'] ."</p> 
-									<p>
-						 			<button type='button' class='btn btn-info'>Php</button>
-						 		<button type='button' class='btn btn-primary'>Technology</button>
-						 			</p>
 								</div>
-								<div class='col-sm-3'>
-								<ul class='w3-ul'>
-								<li><a href='#'>Votes <span class='badge'>" . rand ( 0, 20 ) . "</span></a></li>
-								<li><a href='#'>Answers <span class='badge'>" . rand ( 0, 20 ) . "</span></a></li>
-								<li><a href='#'>Views <span class='badge'>" . rand ( 0, 20 ) . "</span></a></li>
-								</ul>
+								<div class='col-sm-2'>
+								Votes <a href='#'><span class='badge'>".$row["votes"]."</span></a>
+								Answers <a href='#'><span class='badge'>" .$row["answers"]."</span></a>
 								</div>
-						  		<div class='col-sm-1'><p>Posted by: Kumar</p></div>
+						  		<div class='col-sm-3'><p style='word-wrap: break-word;'>Posted by:<br>".$row ["username"]."</p></div>
 						  		</div>
 								<div id='mycollapse" . ($x + 1) . "' class='post-footer collapse'><div class='list-group'>";
 								
-								$ans = rand ( 0, 3 );
-								
-								for($y = 0; $y <= $ans; $y ++) {
-									$postinfo = $postinfo . "<a href='#' class='list-group-item'>Your first answer goes here!!</a>";
+								$sql2="SELECT A.aid,A.adesc,U.username,A.best_ans,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"];
+								$rs2 = mysqli_query($conn,$sql2);
+								$y = 0;
+								while ( $ansrow = mysqli_fetch_assoc ( $rs2 ) ) {
+									$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$ansrow["username"]."</b></div><a href='#'class='col-sm-2'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-2'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a></div>";
 								}
-								
+								$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='comment".($x + 1)."' onclick='event.stopPropagation()'></textarea><input type='button' value='Submit' onclick='saveAnswer(".($x+1).",".$row["qid"].")'></div>";
 								$postinfo = $postinfo . "</div></div></div>";
-								
 								echo $postinfo;
+								$y = $y + 1;
 								$x = $x + 1;
 							}
 						}
@@ -224,7 +266,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 				</div>
 			</div>
 			<div class="row">
-				<div class="panel panel-info">
+				<div class="panel panel-info" style="display:none;">
 					<div class="panel-heading">Recommendations</div>
 					<div class="panel-body" style="height: auto;">
 						<div></div>

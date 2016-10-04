@@ -1,5 +1,7 @@
 <?php
-require_once '../connectDB.php';
+include("../connectDB.php");
+$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
+OR die ('Could not connect to MySQL: '.mysql_error());
 $qid=0;
 if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	$title=$_POST["title"];
