@@ -55,14 +55,13 @@ function createPost()
 {
 	//alert("uname:"+uname+"title"+$("#postTitle").val());
 	var postData = "uname="+ uname+"&title="+$("#postTitle").val()+"&content="+$("#postContent").val();
-	alert("post data:"+postData);
     $.ajax({
           type: "post",
           url: "services/CreatePost.php",
           data: postData,
           contentType: "application/x-www-form-urlencoded",
           success: function(responseData, textStatus, jqXHR) {
-              alert("data saved  :"+responseData);
+			   location.reload(); 
           },
           error: function(jqXHR, textStatus, errorThrown) {
               console.log(errorThrown);
@@ -96,6 +95,7 @@ function showLogout()
 	$("#logoutLink").show();
 	$("#myQuesSection").show();
 	$("#aboutUs").hide();
+	$("#profileLink").show();
 	$('#myQuesSection').css('opacity', '1');
 }
 function showMyQuestions()
@@ -112,21 +112,26 @@ function voteQuestion(voteValue)
 {
 	
 }
+
+function showQuesDesc(x)
+{
+	$('#myDesc'+x).css('opacity', '1');
+}
 </script>
 </head>
 <body onload="showMyQuestions()">
 	<nav class="navbar navbar-inverse" style="background-color:#4d636f;color:white;">
 		<div class="container-fluid">
 			<div class="navbar-header">
-				<img class="navbar-brand" src='./images/logo.png' style="padding: 5px 10px;">
+				<img class="navbar-brand" src='./images/FoodieLogo.png' style="padding: 5px 10px;">
 			</div>
 			<ul class="nav navbar-nav">
 				<li class="active" ><a href="#" style="background-color:#3a4b53;">Top Questions</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
+				<li id='profileLink' style="display: none;cursor:hand;color:white;"><a> Welcome,<?php echo $_SESSION["username"]; ?> </a></li>
+				<li id='postLink' style="display: none;cursor:hand;"><a data-toggle='modal'data-target='#myPostModal'>Post</a></li>
 				<li id='loginLink'><a data-toggle='modal' data-target='#myModal' style='cursor: hand;'>Login</a></li>
-				<li id='postLink' style="display: none;cursor:hand;"><a data-toggle='modal'
-					data-target='#myPostModal'>Post</a></li>
 				<li id='logoutLink' style="display: none;"><a href="logout.php">Logout</a></li>
 			</ul>
 		</div>
@@ -152,7 +157,7 @@ include ("connectDB.php");
 function showTopPosts($uid) {
 	$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 	OR die ('Could not connect to MySQL: '.mysql_error());
-	$sql1 = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes FROM question Q,user U WHERE 	U.uid=Q.uid and U.uid!=".$uid;
+	$sql1 = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid." order by value desc";
 	if(!$conn)
 	{
 		echo "error";
@@ -163,9 +168,8 @@ function showTopPosts($uid) {
 		$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;' >
 		<div class='row post'>
 		<div class='col-sm-7'>
-			<p class='title' style='cursor: hand;' data-toggle='collapse' data-target='#collapse" . ($x + 1) . "'>" . $row ["qtitle"] . "</p> 
-			<a href='javascript:voteQuestion(1)'><img width='24px' height='24px' src='./images/ques-up.png'></a>
-			<a href='javascript:voteQuestion(-1)'><img width='24px' height='24px' src='./images/ques-down.png' ></a>
+			<p class='title' style='cursor: hand;' data-toggle='collapse' data-target='#collapse" . ($x + 1) . "' >" . $row ["qtitle"] . "</p> 
+			<p id='myDesc".($x + 1)."'>".$row["qcontent"]."</p>
 		</div>
 		<div class='col-sm-2'>
 		<a href='#'>Votes <span class='badge'>".$row["votes"]."</span></a>
@@ -173,7 +177,8 @@ function showTopPosts($uid) {
 		</div>
   		<div class='col-sm-3'><p style='word-wrap: break-word;'>Posted by:<br>".$row ["username"]."</p></div>
   		</div>
-		<div id='collapse".($x + 1) ."' class='post-footer collapse'><div class='list-group'>";
+		<div id='collapse".($x + 1) ."' class='post-footer collapse'><div class='list-group'><div class='list-group-item row' style='margin:0px;'><a href='javascript:voteQuestion(1)'><img width='24px' height='24px' src='./images/ques-up.png'></a>
+			<a href='javascript:voteQuestion(-1)'><img width='24px' height='24px' src='./images/ques-down.png' ></a></div>";
 		$sql2="SELECT A.aid,A.adesc,U.username,A.best_ans,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"];
 		$rs2 = mysqli_query($conn,$sql2);
 		$y = 0;
@@ -205,6 +210,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	$rs = mysqli_query ( $conn,$sql );
 	while ( $row = mysqli_fetch_assoc ( $rs ) ) {
 		$uid = $row ["uid"];
+		$_SESSION["username"]=$row["username"];
 		echo "<script type='text/javascript'>uname=" . $uid . ";showLogout();</script>";
 		showTopPosts($uid);
 	}
@@ -228,13 +234,13 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 						if ($uid != 0) {
 							$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 							OR die ('Could not connect to MySQL: '.mysql_error());
-							$sql = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes FROM question Q,user U WHERE 	U.uid=Q.uid and U.uid=".$uid."";
+							$sql = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc";
 							$rs = mysqli_query ($conn,$sql );
 							$x = 0;
 							while ( $row = mysqli_fetch_assoc ( $rs ) ) {
-								$postinfo = "<div class='w3-card-2 w3-hover-shadow' data-toggle='collapse' data-target='#mycollapse" . ($x + 1) . "' style='border-left: 4px solid #009688;'><div class='row post'>
+								$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;'><div class='row post'>
 								<div class='col-sm-7'>
-									<p class='title'>" .$row ['qtitle'] ."</p> 
+									<p class='title' style='cursor: hand;' data-toggle='collapse' data-target='#mycollapse" . ($x + 1) . "'>" . $row ["qtitle"] . "</p> 
 								</div>
 								<div class='col-sm-2'>
 								Votes <a href='#'><span class='badge'>".$row["votes"]."</span></a>
