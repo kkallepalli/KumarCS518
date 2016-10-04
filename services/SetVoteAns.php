@@ -8,7 +8,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	$vote=$_POST["vote"];
 	$aid=$_POST["aid"];
 	$uid=$_POST["uname"];
-	$sql = "INSERT INTO Votes_Ans(vote_ans, aid, vote_ans_uid) VALUES (".$vote.",".$aid.",".$uid.")";
+	$sql = "INSERT INTO votes_ans(vote_ans, aid, vote_ans_uid) VALUES (".$vote.",".$aid.",".$uid.")";
 	echo $sql;
 	if(mysqli_query($conn,$sql))
 	{
