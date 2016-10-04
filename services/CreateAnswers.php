@@ -12,11 +12,13 @@ OR die ('Could not connect to MySQL: '.mysql_error());
 $aid=0;
 if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	$adesc = test_input($_POST["adesc"]);
-	$_adesc = mysql_real_escape_string($adesc);
+
+	//$_adesc = mysql_real_escape_string($_POST["adesc"]);
+	
 	$qid = $_POST["qid"];
 	$uid = $_POST["uname"];
+	$sql = "INSERT INTO answers(adesc, qid, uid_ans, answered_date) VALUES ('".$adesc."',".$qid.",".$uid.",'".date("Y-m-d h:i:sa ")."')";
 	
-	echo $sql;
 	if(mysqli_query($conn,$sql))
 	{
 		$aid=mysqli_insert_id($conn);
