@@ -9,10 +9,8 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	$aid=$_POST["aid"];
 	$uid=$_POST["uname"];
 	$sql = "INSERT INTO votes_ans(vote_ans, aid, vote_ans_uid) VALUES (".$vote.",".$aid.",".$uid.")";
-	echo $sql;
 	if(mysqli_query($conn,$sql))
 	{
-		
 		$vid=mysqli_insert_id($conn);
 		echo $vid;
 	}

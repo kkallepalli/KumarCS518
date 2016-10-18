@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Oct 17, 2016 at 09:40 PM
+-- Generation Time: Oct 18, 2016 at 12:05 PM
 -- Server version: 10.0.19-MariaDB-1~trusty-log
 -- PHP Version: 5.5.9-1ubuntu4.9
 
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `answers` (
   `uid_ans` int(11) NOT NULL,
   `answered_date` date NOT NULL,
   `best_ans` tinyint(1) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `answers`
@@ -55,11 +55,18 @@ INSERT INTO `answers` (`aid`, `adesc`, `qid`, `uid_ans`, `answered_date`, `best_
 (22, 'Cut the potatoes in ''select * from quiz     pieces.', 3, 4, '2016-10-04', 0),
 (23, 'You cannot cook in 2 mins', 6, 1, '2016-10-04', 0),
 (24, 'go to dominos', 9, 4, '2016-10-17', 0),
-(25, 'California Pizza Kitchen is the best place in Norfolk!', 11, 8, '2016-10-17', 0),
+(25, 'California Pizza Kitchen is the best place in Norfolk!', 11, 8, '2016-10-17', 1),
 (26, 'Get ready to eat Dhokla from the Indian stores. Saves a lot of you time.', 14, 7, '2016-10-17', 0),
 (27, 'Mazzika in colley avenue.', 15, 7, '2016-10-17', 0),
 (28, 'I guess buffalo wild wings', 10, 10, '2016-10-17', 0),
-(29, 'Buy the frozen pizza from seven 11 and just heat it.', 13, 10, '2016-10-17', 1);
+(29, 'Buy the frozen pizza from seven 11 and just heat it.', 13, 10, '2016-10-17', 1),
+(32, 'hello', 2, 8, '2016-10-17', 0),
+(36, 'hello :) smiley', 2, 10, '2016-10-18', 1),
+(37, 'hello :)', 2, 10, '2016-10-18', 0),
+(38, 'hello :)', 9, 10, '2016-10-18', 0),
+(40, 'hello :)', 12, 1, '2016-10-18', 0),
+(41, 'Wine should be at room temperature :)', 4, 1, '2016-10-18', 0),
+(42, 'select * from pizza', 11, 1, '2016-10-18', 0);
 
 -- --------------------------------------------------------
 
@@ -75,7 +82,7 @@ CREATE TABLE IF NOT EXISTS `question` (
   `uid` int(11) NOT NULL,
   `created_date` date NOT NULL,
   `views` int(200) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `question`
@@ -169,7 +176,7 @@ CREATE TABLE IF NOT EXISTS `votes_ans` (
   `vote_ans` int(10) NOT NULL,
   `aid` int(10) NOT NULL,
   `vote_ans_uid` int(10) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `votes_ans`
@@ -178,7 +185,11 @@ CREATE TABLE IF NOT EXISTS `votes_ans` (
 INSERT INTO `votes_ans` (`vid_ans`, `vote_ans`, `aid`, `vote_ans_uid`) VALUES
 (5, 1, 1, 4),
 (6, -1, 1, 5),
-(8, 1, 1, 6);
+(8, 1, 1, 6),
+(9, 1, 28, 1),
+(14, 1, 40, 1),
+(15, 1, 8, 1),
+(17, -1, 3, 1);
 
 -- --------------------------------------------------------
 
@@ -271,12 +282,12 @@ ALTER TABLE `votes_ques`
 -- AUTO_INCREMENT for table `answers`
 --
 ALTER TABLE `answers`
-  MODIFY `aid` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=30;
+  MODIFY `aid` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=43;
 --
 -- AUTO_INCREMENT for table `question`
 --
 ALTER TABLE `question`
-  MODIFY `Qid` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=17;
+  MODIFY `Qid` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=18;
 --
 -- AUTO_INCREMENT for table `user`
 --
@@ -286,7 +297,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `votes_ans`
 --
 ALTER TABLE `votes_ans`
-  MODIFY `vid_ans` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=9;
+  MODIFY `vid_ans` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=19;
 --
 -- AUTO_INCREMENT for table `votes_ques`
 --

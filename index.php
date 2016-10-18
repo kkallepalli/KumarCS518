@@ -77,9 +77,17 @@ function createPost()
       });
 	$("#myPostModal").modal('hide');
 }
-function saveAnswer(x,qid)
+function saveAnswer(type,x,qid)
 {
-	var desc=$("#comment"+x).val();
+	var desc="";
+	if(type==1)
+	{
+		desc=$("#comment"+x).val();
+		}else
+		{
+			desc=$("#mycomment"+x).val();
+		}
+	 
 	var postData = "uname="+ uname+"&qid="+qid+"&adesc="+desc;
 	$.ajax({
           type: "post",
@@ -93,7 +101,14 @@ function saveAnswer(x,qid)
               console.log(jqXHR+":"+errorThrown);
           }
       });
-	$("#comment"+x).val("");
+	if(type==1)
+	{
+		$("#comment"+x).val("");
+		}else
+		{
+			$("#mycomment"+x).val("");
+		}
+	
 }
 
 function showLogout()
@@ -172,7 +187,7 @@ function voteAnswer(voteValue,aid)
 	var postData = "vote="+ voteValue+"&aid="+aid+"&uname="+uname;
 	$.ajax({
           type: "post",
-          url: "services/SetVotesAns.php",
+          url: "services/SetVoteAns.php",
           data: postData,
           contentType: "application/x-www-form-urlencoded",
           success: function(responseData, textStatus, jqXHR) {
@@ -269,8 +284,8 @@ function showTopPosts($uid) {
 			<p id='myDesc".($x + 1)."'>".$row["qcontent"]."</p>
 		</div>
 		<div class='col-sm-2'>
-		Votes Up: <span id='qVoteUp".$row["qid"]."' class='badge'>".$row["votesup"]."</span>
-		Votes Down: <span id='qVoteDown".$row["qid"]."' class='badge'>".$row["votesdown"]."</span>
+		Up: <span id='qVoteUp".$row["qid"]."' class='badge'>".$row["votesup"]."</span>
+		Down: <span id='qVoteDown".$row["qid"]."' class='badge'>".$row["votesdown"]."</span>
 		Answers <a href='#'><span id='qanswers".$row["qid"]."' class='badge'>" .$row["answers"]."</span></a>
 		</div>
   		<div class='col-sm-3'><p style='word-wrap: break-word;'>Posted by:<br>".$row ["username"]."</p></div>
@@ -293,16 +308,16 @@ function showTopPosts($uid) {
 		$y = 0;
 		if($bestansid>0)
 		{
-			$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$bestrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$bestrow["username"]."</b></div><a href='#'class='col-sm-1'>".$bestrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$bestrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a><div class='col-sm-2'><img  class='img-responsive' width='24px' height='24px' src='./images/bestans.png' ></div></div>";
+			$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$bestrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$bestrow["username"]."</b></div><div class='col-sm-1'><span id='qAnsUp".$bestrow["aid"]."'>".$bestrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$bestrow["aid"].")'></div><div class='col-sm-1' style='cursor:hand;'><span id='qAnsDown".$bestrow["aid"]."'>".$bestrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$bestrow["aid"].")' style='cursor:hand;'></div><div class='col-sm-2'><img  class='img-responsive' width='24px' height='24px' src='./images/bestans.png' ></div></div>";
 			$y=$y+1;
 		}
 		while ( $ansrow = mysqli_fetch_assoc ( $rs2 ) ) {
 		if($bestansid!=$ansrow["aid"])
 				{
-					$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$ansrow["username"]."</b></div><a href='#'class='col-sm-1'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a></div>";
+					$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$ansrow["username"]."</b></div><div class='col-sm-1'><span id='qAnsUp".$ansrow["aid"]."'>".$ansrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$ansrow["aid"].")' style='cursor:hand;'></div><div class='col-sm-1'><span id='qAnsDown".$bestrow["aid"]."'>".$ansrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$ansrow["aid"].")' style='cursor:hand;'></div></div>";
 				}
 			}
-		$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='comment".($x + 1)."' onclick='event.stopPropagation()'></textarea><input type='button' value='Submit' onclick='saveAnswer(".($x+1).",".$row["qid"].")'></div>";
+		$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='comment".($x + 1)."' onclick='event.stopPropagation()'></textarea><input type='button' value='Submit' onclick='saveAnswer(1,".($x+1).",".$row["qid"].")'></div>";
 		$postinfo = $postinfo . "</div></div></div>";
 		echo $postinfo;
 		$y = $y + 1;
@@ -351,7 +366,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 						if ($uid != 0) {
 							$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 							OR die ('Could not connect to MySQL: '.mysql_error());
-							$sql = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc limit 5";
+							$sql = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc";
 							$rs = mysqli_query ($conn,$sql );
 							$x = 0;
 							while ( $row = mysqli_fetch_assoc ( $rs ) ) {
@@ -400,7 +415,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 										}
 									}
 								}
-								$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='comment".($x + 1)."' onclick='event.stopPropagation()'></textarea><input type='button' value='Submit' onclick='saveAnswer(".($x+1).",".$row["qid"].")'></div>";
+								$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='mycomment".($x + 1)."' onclick='event.stopPropagation()'></textarea><input type='button' value='Submit' onclick='saveAnswer(2,".($x+1).",".$row["qid"].")'></div>";
 								$postinfo = $postinfo . "</div></div></div>";
 								echo $postinfo;
 								$y = $y + 1;
