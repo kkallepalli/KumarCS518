@@ -1,2 +1,0 @@
-Authors: Seyedmeysam Abolghasemi <sabolgha> and Bashaer Alkhalis <balkh>
-Relational Algebra for CS 450/550 [Fall 2016]
