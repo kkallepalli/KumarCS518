@@ -1,5 +1,6 @@
 <?php
 session_start ();
+include ("connectDB.php");
 $_SESSION["username"]=$_POST["email"];
 ?>
 <html>
@@ -13,6 +14,8 @@ $_SESSION["username"]=$_POST["email"];
 	rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
 <script src="js/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="js/bootstrap.min.js"></script>
 <style type="text/css">
 .title {
@@ -52,22 +55,28 @@ $_SESSION["username"]=$_POST["email"];
 </style>
 <script type="text/javascript">
 var uname="";
-function createPost()
+
+/* Satya: Code for user registration: */
+function regUser()
 {
-	
-	var postData = "uname="+ uname+"&title="+$("#postTitle").val()+"&content="+$("#postContent").val();
+	if ($("#newUserId").val() == "" || $("#newUserPw").val() == "") {
+		alert ("Username & Password is mandatory");
+	} else {
+				
+	var postData = "&username="+$("#newUserId").val()+"&password="+$("#newUserPw").val();
     $.ajax({
           type: "post",
-          url: "services/CreatePost.php",
+          url: "services/RegisterUser.php",
           data: postData,
           contentType: "application/x-www-form-urlencoded",
           success: function(responseData, textStatus, jqXHR) {
-              if(responseData=="error")
+              if(responseData.split("-")[0]=="error")
               {
-            	  alert("uname:"+uname+"title"+$("#postTitle").val());
-                 }
+            	  alert(responseData.split("-")[1]);
+                }
               else
               {
+               alert("Registration successful, please login using the link above")
 			   location.reload(); 
               }
           },
@@ -75,7 +84,41 @@ function createPost()
               console.log(errorThrown);
           }
       });
-	$("#myPostModal").modal('hide');
+	$("#regModal").modal('hide');
+	}
+}
+
+
+function createPost()
+{
+	if($("#postTitle").val()=='' || $("#postTitle").val()==null || $("#postContent").val()=="" || $("#postContent").val()==null )
+	{
+		alert("Post Title & content cannot be empty : "+$("#tags").val());
+		}
+	else
+	{
+			var postData = "uname="+ uname+"&title="+$("#postTitle").val()+"&content="+$("#postContent").val()+"&tags="+$("#tags").val();
+		    $.ajax({
+		          type: "post",
+		          url: "services/CreatePost.php",
+		          data: postData,
+		          contentType: "application/x-www-form-urlencoded",
+		          success: function(responseData, textStatus, jqXHR) {
+		              if(responseData=="error")
+		              {
+		            	  alert("uname:"+uname+"title"+$("#postTitle").val());
+		                 }
+		              else
+		              {
+					   location.reload(); 
+		              }
+		          },
+		          error: function(jqXHR, textStatus, errorThrown) {
+		              console.log(errorThrown);
+		          }
+		      });
+			$("#myPostModal").modal('hide');
+	}
 }
 function saveAnswer(type,x,qid)
 {
@@ -114,11 +157,13 @@ function saveAnswer(type,x,qid)
 function showLogout()
 {
 	$("#postLink").show();
+	$("#topbar").show();
 	$("#loginLink").hide();
 	$("#logoutLink").show();
 	$("#myQuesSection").show();
 	$("#aboutUs").hide();
 	$("#profileLink").show();
+	$("#registerLink").hide();
 	$('#myQuesSection').css('opacity', '1');
 }
 function showMyQuestions()
@@ -217,13 +262,76 @@ function voteAnswer(voteValue,aid)
 	
 }
 
+function searchPosts()
+{
+	var txt = $('#search-criteria').val();
+	if(txt=='' || txt ==null)
+	{
+		$('.top-posts').show();
+		}
+	else
+	{
+		$('.top-posts').hide();
+	    $('.top-posts').each(function(){
+	       if($(this).text().toUpperCase().indexOf(txt.toUpperCase()) != -1){
+	           $(this).show();
+	       }
+	    });
+	}
+}
+
+function clearSearchResults()
+{
+	$('#search-criteria').val("");
+	$('.top-posts').show();
+}
+
+function sortTopQuestions(x)
+{
+	var $divs = $("div.top-posts");
+		if(x==1)
+		{
+// 			var alphabeticallyOrderedDivs = $divs.sort(function (a, b) {
+// 		        return $(a).find("qVoteUp").text() < $(b).find("qVoteUp").text();
+// 		    });
+// 		    $("#topQuestionsSection").html(alphabeticallyOrderedDivs);
+			}
+}
+
 function showQuesDesc(x)
 {
 	$('#myDesc'+x).css('opacity', '1');
 }
+
+function loadRecommendations(uid,eventid,qid)
+{
+	var postData = "uid="+ uid+"&event="+eventid+"&qid="+qid;
+		$.ajax({
+	          type: "post",
+	          url: "services/Recommendations.php",
+	          data: postData,
+	          contentType: "application/x-www-form-urlencoded",
+	          success: function(responseData, textStatus, jqXHR) {
+	           		$("#recommendationSection").append(responseData);
+	          },
+	          error: function(jqXHR, textStatus, errorThrown) {
+	              alert("Error setting best answer!! Try again");
+	              console.log(jqXHR+":"+errorThrown);
+	          }
+	      });
+}
+
+$(function() {
+var availableTags = ["Indian","Chinese","French","Greek","Italian","Thai","Mediterrian","American","Continental","Cuban","Mexican","Malaysian","Singapore","Spanish"];
+
+$( "#tags" ).autocomplete({
+    source: availableTags
+  });
+$( "#ui-id-1").attr("style","z-index:1050");
+});
 </script>
 </head>
-<body onload="showMyQuestions()">
+<body onload="showMyQuestions();loadRecommendations(1,1,22);">
 	<nav class="navbar navbar-inverse"
 		style="background-color: #4d636f; color: white;">
 		<div class="container-fluid">
@@ -238,6 +346,7 @@ function showQuesDesc(x)
 					data-toggle='modal' data-target='#myPostModal'>Post</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
+		<li id="registerLink"><a data-toggle='modal' data-target='#regModal' style='cursor: hand;'>Register</a></li>
 				<li id='profileLink'
 					style="display: none; cursor: hand; color: white;"><a> Welcome,<?php echo $_SESSION["username"]; ?> </a></li>
 				<li id='loginLink'><a data-toggle='modal' data-target='#myModal'
@@ -258,18 +367,64 @@ function showQuesDesc(x)
 			mission is to teach and inspire food lovers across the globe by
 			sharing talent and knowledge.
 		</div>
-
-		<b>Get Started - Register Now! </b>
+		
+		<b>Top 5 Questions</b>
+		<?php 
+		$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
+		OR die ('Could not connect to MySQL: '.mysql_error());
+		$sql1 = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value FROM question Q,user U WHERE U.uid=Q.uid order by value desc limit 5";
+		if(!$conn)
+		{
+			echo "error";
+		}
+		$rs1 = mysqli_query($conn,$sql1);
+		$x = 0;
+		while ( $row = mysqli_fetch_assoc ( $rs1 ) ) {
+			$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;' >
+		<div class='row post'>
+		<div class='col-sm-7'>
+			<p class='title' style='cursor: hand;' data-toggle='modal' data-target='#myModal'' >" . $row ["qtitle"] . "</p>
+			<p>".$row["qcontent"]."</p>
+		</div>
+		<div class='col-sm-2'>
+		Up: <span  class='badge'>".$row["votesup"]."</span>
+		Down: <span class='badge'>".$row["votesdown"]."</span>
+		Answers <a href='#'><span  class='badge'>" .$row["answers"]."</span></a>
+		</div>
+  		<div class='col-sm-3'><p style='word-wrap: break-word;'>Posted by:<br>".$row ["username"]."</p></div>
+  		</div>";
+			$postinfo = $postinfo . "</div>";
+			echo $postinfo;
+			$x = $x + 1;
+		}
+		mysqli_close($conn);
+		?>
 	</div>
 	<div class="row"
 		style="margin-left: 0px; margin-right: 0px; min-height: 80vh;">
-		<div class="col-sm-6 w3-card-2">
+		<div class="col-sm-6 w3-card-2" id="topQuestionsSection">
+		<div class="row" style="padding: 5px; margin:0px;background-color: #1b427;display:none;" id="topbar">
+				<input type="text" id="search-criteria" />
+				<button id="search" type="button" class="btn btn-default btn-sm" onclick="searchPosts()">
+         		<img src="images/magnify.png">
+        		</button>
+        		<button id="clearSearch" type="button" class="btn btn-default btn-sm" onclick="clearSearchResults()">
+         		<img src="images/close-circle.png">
+        		</button>
+        		<button id="sortTimeAesc" type="button" class="btn btn-default btn-sm" onclick="sortTopQuestions(1)">
+         		<img src="images/sort-ascending.png">
+        		</button>
+        		<button id="sortTimeDesc" type="button" class="btn btn-default btn-sm" onclick="sortTopQuestions(2)">
+         		<img src="images/sort-descending.png">
+        		</button>
+        		<label class="radio-inline"><input type="radio" name="optradio" checked="checked">Date</label>
+				<label class="radio-inline"><input type="radio" name="optradio">Score</label>
+		 </div>
 <?php
-include ("connectDB.php");
 function showTopPosts($uid) {
 	$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 	OR die ('Could not connect to MySQL: '.mysql_error());
-	$sql1 = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid." order by value desc";
+	$sql1 = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid." order by value desc";
 	if(!$conn)
 	{
 		echo "error";
@@ -278,17 +433,22 @@ function showTopPosts($uid) {
 	$x = 0;
 	while ( $row = mysqli_fetch_assoc ( $rs1 ) ) {
 		$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;' >
-		<div class='row post'>
+		<div class='row post top-posts'>
 		<div class='col-sm-7'>
 			<p class='title' style='cursor: hand;' data-toggle='collapse' data-target='#collapse" . ($x + 1) . "' >" . $row ["qtitle"] . "</p> 
-			<p id='myDesc".($x + 1)."'>".$row["qcontent"]."</p>
-		</div>
+			<p id='myDesc".($x + 1)."'>".$row["qcontent"]."</p>";
+					if($row["tags"]!=null)
+								{
+									$postinfo = $postinfo ."<a href='#' style='background-color: #5bc0de;color:#ffffff;padding: 5px;'>".$row["tags"]."</a>";
+								}
+		$postinfo =	$postinfo."</div>
 		<div class='col-sm-2'>
 		Up: <span id='qVoteUp".$row["qid"]."' class='badge'>".$row["votesup"]."</span>
 		Down: <span id='qVoteDown".$row["qid"]."' class='badge'>".$row["votesdown"]."</span>
 		Answers <a href='#'><span id='qanswers".$row["qid"]."' class='badge'>" .$row["answers"]."</span></a>
+		
 		</div>
-  		<div class='col-sm-3'><p style='word-wrap: break-word;'>Posted by:<br>".$row ["username"]."</p></div>
+  		<div class='col-sm-3'><p style='word-wrap: break-word;'>Posted by:<br>".$row ["username"]."</p><p style='font-size: 12px;color: #0096e1;font-weight: bold;'>".$row ["created_date"]."</p></div>
   		</div>
 		<div id='collapse".($x + 1) ."' class='post-footer collapse'><div class='list-group'><div class='list-group-item row' style='margin:0px;'><a href='javascript:voteQuestion(1,".$row["qid"].")'><img width='24px' height='24px' src='./images/ques-up.png'></a>
 			<a href='javascript:voteQuestion(-1,".$row["qid"].")'><img width='24px' height='24px' src='./images/ques-down.png' ></a></div>";
@@ -366,19 +526,24 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 						if ($uid != 0) {
 							$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 							OR die ('Could not connect to MySQL: '.mysql_error());
-							$sql = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc";
+							$sql = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc";
 							$rs = mysqli_query ($conn,$sql );
 							$x = 0;
 							while ( $row = mysqli_fetch_assoc ( $rs ) ) {
 								$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;'><div class='row post'>
 								<div class='col-sm-7'>
 									<p class='title' style='cursor: hand;' data-toggle='collapse' data-target='#mycollapse" . ($x + 1) . "'>" . $row ["qtitle"] . "</p> 
-									<p id='qdescription".($x + 1)."'>".$row["qcontent"]."</p>
-								</div>
+									<p id='qdescription".($x + 1)."'>".$row["qcontent"]."</p>";
+								
+								if($row["tags"]!=null)
+								{
+									$postinfo = $postinfo ."<a href='#' style='background-color: #5bc0de;color:#ffffff;padding: 5px;'>".$row["tags"]."</a>";
+								}
+								
+								$postinfo = $postinfo ."</div>
 								<div class='col-sm-2'>
 								Votes <a href='#'><span class='badge'>".$row["value"]."</span></a>
-								Answers <a href='#'><span class='badge'>" .$row["answers"]."</span></a>
-								</div>
+								Answers <a href='#'><span class='badge'>" .$row["answers"]."</span></a></div>
 						  		<div class='col-sm-3'><p style='word-wrap: break-word;'>Posted by:<br>".$row ["username"]."</p></div>
 						  		</div>
 								<div id='mycollapse" . ($x + 1) . "' class='post-footer collapse'><div class='list-group'>";
@@ -431,14 +596,40 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 				</div>
 			</div>
 			<div class="row">
-				<div class="panel panel-info" style="display: none;">
+				<div class="panel panel-info" style="display: block;">
 					<div class="panel-heading">Recommendations</div>
-					<div class="panel-body" style="height: auto;">
+					<div class="panel-body" id="recommendationSection" style="height: auto;">
 						<div></div>
 					</div>
 				</div>
 			</div>
 
+		</div>
+		
+		<!-- Satya: Modal for user registration: -->	
+	
+		<div class="modal fade" id="regModal" role="dialog">
+			<div class="modal-dialog modal-sm">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class="modal-title">Create your Foodie account</h4>
+					</div>
+					<div class="modal-body">
+					       	<div class="form-group">
+								<label for="email">Email address/User Name:<span style="color: red;">*</span></label> <input type="text"
+									class="form-control" name="newUserId" id="newUserId" required>
+							</div>
+							<div class="form-group">
+								<label for="pwd">Password:<span style="color: red;">*</span></label> <input type="password"
+									class="form-control" name="newUserPw" id="newUserPw" required>
+									<br><p style="font-size: 12px;">Feilds marked <span style="color: red;"> * </span>are mandatory<p>
+							</div>
+							<button class="btn btn-default" onclick = "regUser()">Register</button>
+					 </div>
+					<div class="modal-footer"></div>
+				</div>
+			</div>
 		</div>
 
 		<div class="modal fade" id="myModal" role="dialog">
@@ -490,6 +681,10 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 						<label for="postContent">Content:</label>
 						<textarea class="form-control" rows="5" id="postContent"
 							name="postContent"></textarea>
+					</div>
+					<div class="form-group">
+						<label for="postContent">Tags:</label>
+						<input id="tags">
 					</div>
 					<button class="btn btn-default" onclick="createPost()">Submit</button>
 				</div>
