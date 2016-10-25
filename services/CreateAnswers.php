@@ -1,4 +1,6 @@
 <?php
+session_start ();
+
 function test_input($data) {
 	$data = trim($data);
 	$data = stripslashes($data);
@@ -22,6 +24,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	if(mysqli_query($conn,$sql))
 	{
 		$aid=mysqli_insert_id($conn);
+		$_SESSION["recQid"]=$_POST["qid"];
 		echo $aid;
 	}
 	else {

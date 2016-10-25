@@ -55,6 +55,7 @@ $_SESSION["username"]=$_POST["email"];
 </style>
 <script type="text/javascript">
 var uname="";
+ var recQid='<?php echo $_SESSION["recQid"]; ?>';
 
 /* Satya: Code for user registration: */
 function regUser()
@@ -138,6 +139,7 @@ function saveAnswer(type,x,qid)
           data: postData,
           contentType: "application/x-www-form-urlencoded",
           success: function(responseData, textStatus, jqXHR) {
+			recQid=qid;
 			  location.reload();   
           },
           error: function(jqXHR, textStatus, errorThrown) {
@@ -165,15 +167,19 @@ function showLogout()
 	$("#profileLink").show();
 	$("#registerLink").hide();
 	$('#myQuesSection').css('opacity', '1');
+	$('#recommendationPanel').show();
+
 }
 function showMyQuestions()
 {
 	if(uname=="")
 	{
 		$('#myQuesSection').css('opacity', '0');
+		$('#recommendationPanel').hide();
 	}
 	else{
 		$('#myQuesSection').css('opacity', '1');
+		loadRecommendations(uname,1,recQid);
 	}
 }
 function submitBestAns(aid)
@@ -227,9 +233,9 @@ function voteQuestion(voteValue,qid)
       });
 }
 
-function voteAnswer(voteValue,aid)
+function voteAnswer(voteValue,aid,qid)
 {
-	var postData = "vote="+ voteValue+"&aid="+aid+"&uname="+uname;
+	var postData = "vote="+ voteValue+"&aid="+aid+"&uname="+uname+"&qid="+qid;
 	$.ajax({
           type: "post",
           url: "services/SetVoteAns.php",
@@ -312,6 +318,7 @@ function loadRecommendations(uid,eventid,qid)
 	          data: postData,
 	          contentType: "application/x-www-form-urlencoded",
 	          success: function(responseData, textStatus, jqXHR) {
+					$("#recommendationSection").empty();
 	           		$("#recommendationSection").append(responseData);
 	          },
 	          error: function(jqXHR, textStatus, errorThrown) {
@@ -331,7 +338,7 @@ $( "#ui-id-1").attr("style","z-index:1050");
 });
 </script>
 </head>
-<body onload="showMyQuestions();loadRecommendations(1,1,22);">
+<body onload="showMyQuestions();">
 	<nav class="navbar navbar-inverse"
 		style="background-color: #4d636f; color: white;">
 		<div class="container-fluid">
@@ -448,7 +455,7 @@ function showTopPosts($uid) {
 		Answers <a href='#'><span id='qanswers".$row["qid"]."' class='badge'>" .$row["answers"]."</span></a>
 		
 		</div>
-  		<div class='col-sm-3'><p style='word-wrap: break-word;'>Posted by:<br>".$row ["username"]."</p><p style='font-size: 12px;color: #0096e1;font-weight: bold;'>".$row ["created_date"]."</p></div>
+  		<div class='col-sm-3'><img src='profiles/profile.png' width='50px' height='50px'  class='img-circle img-responsive'' ><!--<p style='word-wrap: break-word;'>Posted by:<br>--><p style='padding: 5px;'>".$row ["username"]."</p><p style='font-size: 12px;color: #0096e1;font-weight: bold;'>".$row ["created_date"]."</p></div>
   		</div>
 		<div id='collapse".($x + 1) ."' class='post-footer collapse'><div class='list-group'><div class='list-group-item row' style='margin:0px;'><a href='javascript:voteQuestion(1,".$row["qid"].")'><img width='24px' height='24px' src='./images/ques-up.png'></a>
 			<a href='javascript:voteQuestion(-1,".$row["qid"].")'><img width='24px' height='24px' src='./images/ques-down.png' ></a></div>";
@@ -468,13 +475,13 @@ function showTopPosts($uid) {
 		$y = 0;
 		if($bestansid>0)
 		{
-			$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$bestrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$bestrow["username"]."</b></div><div class='col-sm-1'><span id='qAnsUp".$bestrow["aid"]."'>".$bestrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$bestrow["aid"].")'></div><div class='col-sm-1' style='cursor:hand;'><span id='qAnsDown".$bestrow["aid"]."'>".$bestrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$bestrow["aid"].")' style='cursor:hand;'></div><div class='col-sm-2'><img  class='img-responsive' width='24px' height='24px' src='./images/bestans.png' ></div></div>";
+			$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$bestrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$bestrow["username"]."</b></div><div class='col-sm-1'><span id='qAnsUp".$bestrow["aid"]."'>".$bestrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$bestrow["aid"].",".$row["qid"].")'></div><div class='col-sm-1' style='cursor:hand;'><span id='qAnsDown".$bestrow["aid"]."'>".$bestrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$bestrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div><div class='col-sm-2'><img  class='img-responsive' width='24px' height='24px' src='./images/bestans.png' ></div></div>";
 			$y=$y+1;
 		}
 		while ( $ansrow = mysqli_fetch_assoc ( $rs2 ) ) {
 		if($bestansid!=$ansrow["aid"])
 				{
-					$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$ansrow["username"]."</b></div><div class='col-sm-1'><span id='qAnsUp".$ansrow["aid"]."'>".$ansrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$ansrow["aid"].")' style='cursor:hand;'></div><div class='col-sm-1'><span id='qAnsDown".$bestrow["aid"]."'>".$ansrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$ansrow["aid"].")' style='cursor:hand;'></div></div>";
+					$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$ansrow["username"]."</b></div><div class='col-sm-1'><span id='qAnsUp".$ansrow["aid"]."'>".$ansrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$ansrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div><div class='col-sm-1'><span id='qAnsDown".$bestrow["aid"]."'>".$ansrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$ansrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div></div>";
 				}
 			}
 		$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='comment".($x + 1)."' onclick='event.stopPropagation()'></textarea><input type='button' value='Submit' onclick='saveAnswer(1,".($x+1).",".$row["qid"].")'></div>";
@@ -520,7 +527,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 				<div id="myQuesSection" style="opacity: 0;" class="panel panel-info">
 					<div class="panel-heading">My Questions</div>
 					<div id="myQuesHolder" class="panel-body"
-						style="height: 80vh; overflow: scroll;">
+						style="height: 60vh; overflow: scroll;">
 					<?php
 					if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 						if ($uid != 0) {
@@ -596,7 +603,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 				</div>
 			</div>
 			<div class="row">
-				<div class="panel panel-info" style="display: block;">
+				<div id="recommendationPanel" class="panel panel-info" style="display: block;">
 					<div class="panel-heading">Recommendations</div>
 					<div class="panel-body" id="recommendationSection" style="height: auto;">
 						<div></div>

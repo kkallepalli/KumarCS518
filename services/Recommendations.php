@@ -7,7 +7,7 @@ $eventtype = $_REQUEST ["event"];
 if ($eventtype == 1) {
 	$qid = $_REQUEST ["qid"];
 	// answering a question
-	$sql = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=" . $uid . " and Q.qid in (select qid_fk from question_tag where tag_id_fk in (select tag_id_fk from question_tag where qid_fk=" . $qid . "))";
+	$sql = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=" . $uid . " and Q.qid in (select qid_fk from question_tag where tag_id_fk in (select tag_id_fk from question_tag where qid_fk=".$qid.") and qid_fk!=".$qid.")  and Q.qid not in(select qid from answers where uid_ans=" . $uid . ")";
 	$rs1 = mysqli_query($conn,$sql);
 	$x = 0;
 	while ( $row = mysqli_fetch_assoc ( $rs1 ) ) {
