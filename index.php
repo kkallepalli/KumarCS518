@@ -551,6 +551,7 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 	$uid =$_SESSION["uid"];
 	echo "<script type='text/javascript'>uname=" . $_SESSION["uid"] . ";showLogout();</script>";
 	showTopPosts($_SESSION["uid"]);
+	echo "<script type='text/javascript'>document.getElementById('profileHref').href='./profile.php?uid=". $uid . "';</script>";
 }
 ?>
 </div>

@@ -171,7 +171,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
       </form>
 		</div>
 		<div class="col-sm-3">
-			<form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post"
+			<form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"])."?uid=".$_SESSION["uid"];?>" method="post"
 				enctype="multipart/form-data">
 				<div class="form-group">
 					<img border='0' width='150' height='160'
