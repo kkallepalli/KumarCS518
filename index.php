@@ -217,6 +217,8 @@ function voteQuestion(voteValue,qid)
 		            	  if(parseInt(voteValue)==1)
 		          		{
 		          			$('#qVoteUp'+qid).text(parseInt($('#qVoteUp'+qid).text())+1);
+		          			recQid=qid;
+		          			loadRecommendations(uname,1,qid);
 		          		}
 		          		else{
 		          			$('#qVoteDown'+qid).text(parseInt($('#qVoteDown'+qid).text())+1);
@@ -253,6 +255,8 @@ function voteAnswer(voteValue,aid,qid)
             		else{
             			$('#qAnsDown'+aid).text(parseInt($('#qAnsDown'+aid).text())+1);
             		}
+            	  	recQid=qid;
+        			loadRecommendations(uname,1,qid);
                 }
               else
               {
