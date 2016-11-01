@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Oct 25, 2016 at 01:23 PM
+-- Generation Time: Oct 31, 2016 at 11:15 PM
 -- Server version: 10.0.19-MariaDB-1~trusty-log
 -- PHP Version: 5.5.9-1ubuntu4.9
 
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `answers` (
   `uid_ans` int(11) NOT NULL,
   `answered_date` date NOT NULL,
   `best_ans` tinyint(1) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `answers`
@@ -76,7 +76,9 @@ INSERT INTO `answers` (`aid`, `adesc`, `qid`, `uid_ans`, `answered_date`, `best_
 (49, 'Ynot pizza', 11, 1, '2016-10-25', 0),
 (50, 'Dominos', 11, 1, '2016-10-25', 0),
 (51, 'Fry chopped potatoes', 3, 1, '2016-10-25', 0),
-(52, 'This is another answer', 2, 17, '2016-10-25', 0);
+(52, 'This is another answer', 2, 17, '2016-10-25', 0),
+(53, 'this an answer', 6, 17, '2016-10-25', 0),
+(54, 'this &amp;lt;b&amp;gt; is &amp;lt;/b&amp;gt; an answer', 23, 17, '2016-10-31', 0);
 
 -- --------------------------------------------------------
 
@@ -92,7 +94,7 @@ CREATE TABLE IF NOT EXISTS `question` (
   `uid` int(11) NOT NULL,
   `created_date` date NOT NULL,
   `views` int(200) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `question`
@@ -115,7 +117,9 @@ INSERT INTO `question` (`Qid`, `qtitle`, `qcontent`, `uid`, `created_date`, `vie
 (16, 'Burritos', 'How to make burritos', 10, '2016-10-17', 0),
 (18, '&quot;what does &lt;!-- mean&quot;', 'test', 1, '2016-10-18', 0),
 (22, 'Brinjal Curry', 'How to cook spicy brinjal curry', 1, '2016-10-22', 0),
-(23, 'Best eateries around ODU', 'please suggest some good eateries around ODU', 17, '2016-10-25', 0);
+(23, 'Best eateries around ODU', 'please suggest some good eateries around ODU', 17, '2016-10-25', 0),
+(24, 'This is &lt;b&gt; a question&lt;/b&gt; !', 'This is &lt;b&gt; a question&lt;/b&gt; !', 17, '2016-10-31', 0),
+(25, 'Chinese food', 'Which is the best Chinese restaurant in Norfolk?', 86, '2016-10-31', 0);
 
 -- --------------------------------------------------------
 
@@ -144,7 +148,9 @@ INSERT INTO `question_tag` (`qid_fk`, `tag_id_fk`) VALUES
 (11, 9),
 (4, 9),
 (6, 9),
-(23, 1);
+(23, 1),
+(24, 1),
+(25, 2);
 
 -- --------------------------------------------------------
 
@@ -192,7 +198,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `lastname` varchar(30) DEFAULT NULL,
   `address` varchar(100) DEFAULT NULL,
   `email` varchar(30) DEFAULT NULL,
-  `contact` int(15) DEFAULT NULL,
+  `contact` varchar(10) DEFAULT NULL,
   `username` varchar(200) NOT NULL,
   `password` varchar(200) NOT NULL,
   `upic` longtext,
@@ -204,26 +210,26 @@ CREATE TABLE IF NOT EXISTS `user` (
 --
 
 INSERT INTO `user` (`uid`, `firstname`, `lastname`, `address`, `email`, `contact`, `username`, `password`, `upic`, `created_on`) VALUES
-(1, '', '', NULL, NULL, NULL, 'kkall002@odu.edu', '1234', NULL, '2016-09-20'),
-(2, '', '', NULL, NULL, NULL, 'admin', 'cs518pa$$', NULL, NULL),
-(3, '', '', NULL, NULL, NULL, 'jbrunelle', 'M0n@rch$', NULL, NULL),
-(4, '', '', NULL, NULL, NULL, 'pvenkman', 'imadoctor', NULL, NULL),
-(5, '', '', NULL, NULL, NULL, 'rstantz', '"; INSERT INTO Customers (CustomerName,Address,City) Values(@0,@1,@2); --', NULL, NULL),
-(6, '', '', NULL, NULL, NULL, 'dbarrett', 'fr1ed3GGS', NULL, NULL),
-(7, '', '', NULL, NULL, NULL, 'ltully', '<!--<i>', NULL, NULL),
-(8, '', '', NULL, NULL, NULL, 'espengler', 'don''t cross the streams', NULL, NULL),
-(9, '', '', NULL, NULL, NULL, 'janine', '--!drop tables;', NULL, NULL),
-(10, '', '', NULL, NULL, NULL, 'winston', 'zeddM0r3', NULL, NULL),
-(11, '', '', NULL, NULL, NULL, 'gozer', 'd3$truct0R', NULL, NULL),
-(12, '', '', NULL, NULL, NULL, 'slimer', 'f33dM3', NULL, NULL),
-(13, '', '', NULL, NULL, NULL, 'zuul', '105"; DROP TABLE', NULL, NULL),
-(14, '', '', NULL, NULL, NULL, 'keymaster', 'n0D@na', NULL, NULL),
-(15, '', '', NULL, NULL, NULL, 'gatekeeper', '$l0r', NULL, NULL),
-(16, '', '', NULL, NULL, NULL, 'staypuft', 'm@r$hM@ll0w', NULL, NULL),
-(17, '', '', NULL, NULL, NULL, 'satya', 'pass123', NULL, '2016-10-19'),
-(50, '', '', NULL, NULL, NULL, 'maheedhar', '1234', NULL, '2016-10-21'),
-(55, '', '', NULL, NULL, NULL, 'Deepthi', '1234', NULL, '2016-10-21'),
-(86, NULL, NULL, NULL, NULL, NULL, 'sshankar', 'abcd', NULL, '2016-10-24');
+(1, 'Kumar', 'Kallepalli', 'Norfolk, VA', 'kkall002@odu.edu', '7072171427', 'kkall002@odu.edu', '1234', '1.jpg', '2016-09-20'),
+(2, 'Admin', 'admin', 'Norfolk, VA', 'admin@xyz.com', '123-234-34', 'admin', 'cs518pa$$', '2.png', NULL),
+(3, 'Justin', 'Brunelle', 'Norfolk, VA', 'jbrun@xyz.com', '342458697', 'jbrunelle', 'M0n@rch$', NULL, NULL),
+(4, 'Peter', 'Venkman', 'Norfolk, VA', 'pven@xyz.com', '343453466', 'pvenkman', 'imadoctor', '4.jpg', NULL),
+(5, 'Ray', 'stantz', 'Norfolk, VA', 'rstan@xyz.com', '756756645', 'rstantz', '"; INSERT INTO Customers (CustomerName,Address,City) Values(@0,@1,@2); --', '5.jpg', NULL),
+(6, 'Dana', 'Barrett', 'Norfolk, VA', 'dbar@xyz.com', '977565645', 'dbarrett', 'fr1ed3GGS', '6.jpg', NULL),
+(7, 'Louis', 'tully', 'Norfolk, VA', 'ltul@xyz.com', '5656454343', 'ltully', '<!--<i>', '7.jpg', NULL),
+(8, 'Egon ', 'Spengler', 'Norfolk, VA', 'espen@xyz.com', '4564564564', 'espengler', 'don''t cross the streams', '8.jpg', NULL),
+(9, 'Janine ', 'Melnitz', 'Norfolk, VA', 'jmel@xyz.com', '6456454578', 'janine', '--!drop tables;', '9.jpg', NULL),
+(10, 'Winston ', 'Zeddemore', 'Norfolk, VA', 'wzed@xyz.com', '367786655', 'winston', 'zeddM0r3', '10.jpg', NULL),
+(11, 'gozer', 'gozer', 'Norfolk, VA', 'gozer@xyz.com', '7455656454', 'gozer', 'd3$truct0R', NULL, NULL),
+(12, 'slimer', 'slimer', 'Norfolk, VA', 'slimer@xyz.com', '7566453453', 'slimer', 'f33dM3', NULL, NULL),
+(13, 'Zuul', 'Zuul', 'Norfolk, VA', 'zuul@xyz.com', '365767454', 'zuul', '105"; DROP TABLE', NULL, NULL),
+(14, 'keymaster', 'keymaster', 'Norfolk, VA', 'keymas@xyz.com', '423547345', 'keymaster', 'n0D@na', NULL, NULL),
+(15, 'gatekeeper', 'gatekeeper', 'Norfolk, VA', 'gatek@xyz.com', '7567238348', 'gatekeeper', '$l0r', NULL, NULL),
+(16, 'Stay', 'Puft', 'Norfolk, VA', 'stayp@xyz.com', '723739843', 'staypuft', 'm@r$hM@ll0w', NULL, NULL),
+(17, 'Satya', 'Narayan', 'Norfolk, VA', 'satya@xyz.com', '7575757575', 'satya', 'pass123', '17.jpg', '2016-10-19'),
+(50, 'Maheedhar', 'Gunnam', 'Norfolk, VA', 'mgunn@xyz.com', '956389456', 'maheedhar', '1234', NULL, '2016-10-21'),
+(55, 'Deepthi', 'Lakshminarayana', 'Norfolk, VA', 'deepthi@xyz.com', '784548743', 'Deepthi', '1234', NULL, '2016-10-21'),
+(86, 'Surbhi', 'Shankar', 'Norfolk, VA', 'abc@xyz.com', '123-234-34', 'sshankar', 'abcd', '86.jpg', '2016-10-24');
 
 -- --------------------------------------------------------
 
@@ -237,7 +243,7 @@ CREATE TABLE IF NOT EXISTS `votes_ans` (
   `vote_ans` int(10) NOT NULL,
   `aid` int(10) NOT NULL,
   `vote_ans_uid` int(10) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `votes_ans`
@@ -256,7 +262,9 @@ INSERT INTO `votes_ans` (`vid_ans`, `vote_ans`, `aid`, `vote_ans_uid`) VALUES
 (21, -1, 14, 17),
 (24, 1, 32, 17),
 (25, -1, 37, 17),
-(29, 1, 52, 17);
+(29, 1, 52, 17),
+(33, 1, 48, 10),
+(35, 1, 49, 10);
 
 -- --------------------------------------------------------
 
@@ -270,7 +278,7 @@ CREATE TABLE IF NOT EXISTS `votes_ques` (
   `vote_ques` int(10) NOT NULL,
   `qid` int(10) NOT NULL,
   `vote_ques_uid` int(10) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `votes_ques`
@@ -353,12 +361,12 @@ ALTER TABLE `votes_ques`
 -- AUTO_INCREMENT for table `answers`
 --
 ALTER TABLE `answers`
-  MODIFY `aid` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=53;
+  MODIFY `aid` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=55;
 --
 -- AUTO_INCREMENT for table `question`
 --
 ALTER TABLE `question`
-  MODIFY `Qid` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=24;
+  MODIFY `Qid` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=26;
 --
 -- AUTO_INCREMENT for table `tags`
 --
@@ -373,12 +381,12 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `votes_ans`
 --
 ALTER TABLE `votes_ans`
-  MODIFY `vid_ans` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=31;
+  MODIFY `vid_ans` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=36;
 --
 -- AUTO_INCREMENT for table `votes_ques`
 --
 ALTER TABLE `votes_ques`
-  MODIFY `vid_ques` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=28;
+  MODIFY `vid_ques` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=30;
 --
 -- Constraints for dumped tables
 --

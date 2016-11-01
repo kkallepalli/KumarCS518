@@ -1,7 +1,9 @@
 <?php
 session_start ();
-include ("connectDB.php");
-$_SESSION["username"]=$_POST["email"];
+include("connectDB.php");
+if ($_SERVER ['REQUEST_METHOD'] == "POST") {
+	$_SESSION["username"]=$_POST["email"];
+}
 ?>
 <html>
 <head>
@@ -355,7 +357,7 @@ $( "#ui-id-1").attr("style","z-index:1050");
 			<ul class="nav navbar-nav navbar-right">
 		<li id="registerLink"><a data-toggle='modal' data-target='#regModal' style='cursor: hand;'>Register</a></li>
 				<li id='profileLink'
-					style="display: none; cursor: hand; color: white;"><a> Welcome,<?php echo $_SESSION["username"]; ?> </a></li>
+					style="display: none; cursor: hand; color: white;"><a id="profileHref" href=""> Welcome,<?php echo $_SESSION["username"]; ?> </a></li>
 				<li id='loginLink'><a data-toggle='modal' data-target='#myModal'
 					style='cursor: hand;'>Login</a></li>
 				<li id='logoutLink' style="display: none;"><a href="logout.php">Logout</a></li>
@@ -379,7 +381,7 @@ $( "#ui-id-1").attr("style","z-index:1050");
 		<?php 
 		$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 		OR die ('Could not connect to MySQL: '.mysql_error());
-		$sql1 = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value FROM question Q,user U WHERE U.uid=Q.uid order by value desc limit 5";
+		$sql1 = "SELECT Q.qid,qtitle,qcontent,U.upic,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value FROM question Q,user U WHERE U.uid=Q.uid order by value desc limit 5";
 		if(!$conn)
 		{
 			echo "error";
@@ -387,6 +389,11 @@ $( "#ui-id-1").attr("style","z-index:1050");
 		$rs1 = mysqli_query($conn,$sql1);
 		$x = 0;
 		while ( $row = mysqli_fetch_assoc ( $rs1 ) ) {
+			$picurl="profiles/profile.png";
+			if(!empty($row["upic"]))
+			{
+				$picurl="profiles/".$row["upic"];
+			}
 			$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;' >
 		<div class='row post'>
 		<div class='col-sm-7'>
@@ -398,20 +405,19 @@ $( "#ui-id-1").attr("style","z-index:1050");
 		Down: <span class='badge'>".$row["votesdown"]."</span>
 		Answers <a href='#'><span  class='badge'>" .$row["answers"]."</span></a>
 		</div>
-  		<div class='col-sm-3'><p style='word-wrap: break-word;'>Posted by:<br>".$row ["username"]."</p></div>
+  		<div class='col-sm-3'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><br>".$row ["username"]."</div>
   		</div>";
 			$postinfo = $postinfo . "</div>";
 			echo $postinfo;
 			$x = $x + 1;
 		}
-		mysqli_close($conn);
 		?>
 	</div>
 	<div class="row"
 		style="margin-left: 0px; margin-right: 0px; min-height: 80vh;">
 		<div class="col-sm-6 w3-card-2" id="topQuestionsSection">
 		<div class="row" style="padding: 5px; margin:0px;background-color: #1b427;display:none;" id="topbar">
-				<input type="text" id="search-criteria" />
+				<input type="text" id="search-criteria" onkeydown="" />
 				<button id="search" type="button" class="btn btn-default btn-sm" onclick="searchPosts()">
          		<img src="images/magnify.png">
         		</button>
@@ -431,7 +437,7 @@ $( "#ui-id-1").attr("style","z-index:1050");
 function showTopPosts($uid) {
 	$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 	OR die ('Could not connect to MySQL: '.mysql_error());
-	$sql1 = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid." order by value desc";
+	$sql1 = "SELECT Q.qid,qtitle,qcontent,U.upic,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid." order by value desc";
 	if(!$conn)
 	{
 		echo "error";
@@ -439,6 +445,11 @@ function showTopPosts($uid) {
 	$rs1 = mysqli_query($conn,$sql1);
 	$x = 0;
 	while ( $row = mysqli_fetch_assoc ( $rs1 ) ) {
+		$picurl="profiles/profile.png";
+		if(!empty($row["upic"]))
+		{
+			$picurl="profiles/".$row["upic"];
+		}
 		$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;' >
 		<div class='row post top-posts'>
 		<div class='col-sm-7'>
@@ -455,11 +466,11 @@ function showTopPosts($uid) {
 		Answers <a href='#'><span id='qanswers".$row["qid"]."' class='badge'>" .$row["answers"]."</span></a>
 		
 		</div>
-  		<div class='col-sm-3'><img src='profiles/profile.png' width='50px' height='50px'  class='img-circle img-responsive'' ><!--<p style='word-wrap: break-word;'>Posted by:<br>--><p style='padding: 5px;'>".$row ["username"]."</p><p style='font-size: 12px;color: #0096e1;font-weight: bold;'>".$row ["created_date"]."</p></div>
+  		<div class='col-sm-3'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><!--<p style='word-wrap: break-word;'>Posted by:<br>--><p style='padding: 5px;'>".$row ["username"]."</p><p style='font-size: 12px;color: #0096e1;font-weight: bold;'>".$row ["created_date"]."</p></div>
   		</div>
 		<div id='collapse".($x + 1) ."' class='post-footer collapse'><div class='list-group'><div class='list-group-item row' style='margin:0px;'><a href='javascript:voteQuestion(1,".$row["qid"].")'><img width='24px' height='24px' src='./images/ques-up.png'></a>
 			<a href='javascript:voteQuestion(-1,".$row["qid"].")'><img width='24px' height='24px' src='./images/ques-down.png' ></a></div>";
-		$sql2="SELECT A.aid,A.adesc,U.username,A.best_ans,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"]." order by value desc";
+		$sql2="SELECT A.aid,A.adesc,U.upic,U.username,A.best_ans,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"]." order by value desc";
 		$rs2 = mysqli_query($conn,$sql2);
 		$bestansid=0;
 		$bestrow="";
@@ -470,18 +481,30 @@ function showTopPosts($uid) {
 				$bestansid=$arow["aid"];
 				$bestrow=$arow;
 			}
+			$picurl="profiles/profile.png";
+			if(!empty($arow["upic"]))
+			{
+				$picurl="profiles/".$arow["upic"];
+			}
+			$bestrow["upic"]=$picurl;
 		}
 		mysqli_data_seek($rs2,0);
 		$y = 0;
 		if($bestansid>0)
 		{
-			$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$bestrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$bestrow["username"]."</b></div><div class='col-sm-1'><span id='qAnsUp".$bestrow["aid"]."'>".$bestrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$bestrow["aid"].",".$row["qid"].")'></div><div class='col-sm-1' style='cursor:hand;'><span id='qAnsDown".$bestrow["aid"]."'>".$bestrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$bestrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div><div class='col-sm-2'><img  class='img-responsive' width='24px' height='24px' src='./images/bestans.png' ></div></div>";
+			$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$bestrow["adesc"]."</div><div class='col-sm-2'><img src='".$bestrow["upic"]."' width='50px' height='50px'  class='img-circle img-responsive'' ><b>".$bestrow["username"]."</b></div><div class='col-sm-1'><span id='qAnsUp".$bestrow["aid"]."'>".$bestrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$bestrow["aid"].",".$row["qid"].")'></div><div class='col-sm-1' style='cursor:hand;'><span id='qAnsDown".$bestrow["aid"]."'>".$bestrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$bestrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div><div class='col-sm-2'><img  class='img-responsive' width='24px' height='24px' src='./images/bestans.png' ></div></div>";
 			$y=$y+1;
 		}
 		while ( $ansrow = mysqli_fetch_assoc ( $rs2 ) ) {
 		if($bestansid!=$ansrow["aid"])
 				{
-					$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$ansrow["username"]."</b></div><div class='col-sm-1'><span id='qAnsUp".$ansrow["aid"]."'>".$ansrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$ansrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div><div class='col-sm-1'><span id='qAnsDown".$bestrow["aid"]."'>".$ansrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$ansrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div></div>";
+					$picurl="profiles/profile.png";
+					if(!empty($ansrow["upic"]))
+					{
+						$picurl="profiles/".$ansrow["upic"];
+					}
+					
+					$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><b>".$ansrow["username"]."</b></div><div class='col-sm-1'><span id='qAnsUp".$ansrow["aid"]."'>".$ansrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$ansrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div><div class='col-sm-1'><span id='qAnsDown".$bestrow["aid"]."'>".$ansrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$ansrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div></div>";
 				}
 			}
 		$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='comment".($x + 1)."' onclick='event.stopPropagation()'></textarea><input type='button' value='Submit' onclick='saveAnswer(1,".($x+1).",".$row["qid"].")'></div>";
@@ -510,8 +533,10 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	while ( $row = mysqli_fetch_assoc ( $rs ) ) {
 		$uid = $row ["uid"];
 		$_SESSION["username"]=$row["username"];
+		$_SESSION["uid"]=$row["uid"];
 		echo "<script type='text/javascript'>uname=" . $uid . ";showLogout();</script>";
 		showTopPosts($uid);
+		echo "<script type='text/javascript'>document.getElementById('profileHref').href='./profile.php?uid=". $uid . "';</script>";
 	}
 
 	mysqli_close($conn);
@@ -519,6 +544,13 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	if ($uid == 0) {
 		echo "<script type='text/javascript'>alert('Username or password doesnt match');</script>";
 	}
+}
+
+if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
+{
+	$uid =$_SESSION["uid"];
+	echo "<script type='text/javascript'>uname=" . $_SESSION["uid"] . ";showLogout();</script>";
+	showTopPosts($_SESSION["uid"]);
 }
 ?>
 </div>
@@ -529,61 +561,81 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 					<div id="myQuesHolder" class="panel-body"
 						style="height: 60vh; overflow: scroll;">
 					<?php
-					if ($_SERVER ['REQUEST_METHOD'] == "POST") {
+					function showMyPosts()
+					{
+						$uid=$_SESSION["uid"];
 						if ($uid != 0) {
 							$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 							OR die ('Could not connect to MySQL: '.mysql_error());
-							$sql = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc";
+							$sql = "SELECT Q.qid,qtitle,qcontent,U.upic,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc";
 							$rs = mysqli_query ($conn,$sql );
 							$x = 0;
 							while ( $row = mysqli_fetch_assoc ( $rs ) ) {
+								$picurl="profiles/profile.png";
+								if(!empty($row["upic"]))
+								{
+									$picurl="profiles/".$row["upic"];
+								}
 								$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;'><div class='row post'>
 								<div class='col-sm-7'>
-									<p class='title' style='cursor: hand;' data-toggle='collapse' data-target='#mycollapse" . ($x + 1) . "'>" . $row ["qtitle"] . "</p> 
+									<p class='title' style='cursor: hand;' data-toggle='collapse' data-target='#mycollapse" . ($x + 1) . "'>" . $row ["qtitle"] . "</p>
 									<p id='qdescription".($x + 1)."'>".$row["qcontent"]."</p>";
-								
+						
 								if($row["tags"]!=null)
 								{
 									$postinfo = $postinfo ."<a href='#' style='background-color: #5bc0de;color:#ffffff;padding: 5px;'>".$row["tags"]."</a>";
 								}
-								
+						
 								$postinfo = $postinfo ."</div>
 								<div class='col-sm-2'>
 								Votes <a href='#'><span class='badge'>".$row["value"]."</span></a>
 								Answers <a href='#'><span class='badge'>" .$row["answers"]."</span></a></div>
-						  		<div class='col-sm-3'><p style='word-wrap: break-word;'>Posted by:<br>".$row ["username"]."</p></div>
+						  		<div class='col-sm-3'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><br>".$row ["username"]."</div>
 						  		</div>
 								<div id='mycollapse" . ($x + 1) . "' class='post-footer collapse'><div class='list-group'>";
-								
-								$sql2="SELECT A.aid,A.adesc,U.username,A.best_ans,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"]." order by value desc";
+						
+								$sql2="SELECT A.aid,A.adesc,U.upic,U.username,A.best_ans,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"]." order by value desc";
 								$rs2 = mysqli_query($conn,$sql2);
 								$bestansid=0;
 								$bestrow="";
 								while($arow= mysqli_fetch_assoc ( $rs2 ))
 								{
+									$picurl="profiles/profile.png";
+									if(!empty($ansrow["upic"]))
+									{
+										$picurl="profiles/".$ansrow["upic"];
+									}
+									
 									if($arow["best_ans"]==1)
 									{
 										$bestansid=$arow["aid"];
 										$bestrow=$arow;
 									}
+									$bestrow["upic"]=$picurl;
 								}
 								mysqli_data_seek($rs2,0);
 								$y = 0;
 								if($bestansid>0)
 								{
-									$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$bestrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$bestrow["username"]."</b></div><a href='#'class='col-sm-1'>".$bestrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$bestrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a><div class='col-sm-2'><img  class='img-responsive' width='24px' height='24px' src='./images/bestans.png' ></div></div>";
+									$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$bestrow["adesc"]."</div><div class='col-sm-2'><img src='".$bestrow["upic"]."' width='50px' height='50px'  class='img-circle img-responsive'' ><b>".$bestrow["username"]."</b></div><a href='#'class='col-sm-1'>".$bestrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$bestrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a><div class='col-sm-2'><img  class='img-responsive' width='24px' height='24px' src='./images/bestans.png' ></div></div>";
 									$y=$y+1;
 								}
 								while ( $ansrow = mysqli_fetch_assoc ( $rs2 ) ) {
 									if($bestansid!=$ansrow["aid"])
 									{
+										$picurl="profiles/profile.png";
+										if(!empty($ansrow["upic"]))
+										{
+											$picurl="profiles/".$ansrow["upic"];
+										}
+										
 										if($bestansid>0)
 										{
-											$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$ansrow["username"]."</b></div><a href='#' class='col-sm-1'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a></div>";
+											$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' > <b>".$ansrow["username"]."</b></div><a href='#' class='col-sm-1'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a></div>";
 										}
 										else
 										{
-										$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'>Answered by: <b>".$ansrow["username"]."</b></div><a href='#'class='col-sm-1'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a><div class='col-sm-2'><button onclick='submitBestAns(".$ansrow["aid"].")'>Mark</button></div></div>";
+											$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><b>".$ansrow["username"]."</b></div><a href='#'class='col-sm-1'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a><div class='col-sm-2'><button onclick='submitBestAns(".$ansrow["aid"].")'>Mark</button></div></div>";
 										}
 									}
 								}
@@ -594,8 +646,14 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 								$x = $x + 1;
 							}
 						}
-
-						mysqli_close($conn);
+					}
+					
+					if ($_SERVER ['REQUEST_METHOD'] == "POST") {
+						showMyPosts();
+					}
+					if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
+					{
+						showMyPosts();
 					}
 					?>
 					</div>
