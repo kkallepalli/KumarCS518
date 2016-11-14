@@ -56,6 +56,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Stack Exchange</title>
+<link rel="icon" href='./images/icon.png'>
 <link rel="stylesheet" href="css/bootstrap.min.css">
 <link href="http://fonts.googleapis.com/css?family=Montserrat"
 	rel="stylesheet" type="text/css">
