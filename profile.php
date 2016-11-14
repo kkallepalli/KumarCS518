@@ -32,7 +32,8 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 		}
 		
 		if (empty ( $errors ) == true) {
-			move_uploaded_file ( $file_tmp, "profiles/" . $new_file_name );
+			$status=move_uploaded_file ( $file_tmp, "profiles/" . $new_file_name );
+			echo "Status of file uplaod:".$status;
 			
 			$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 			OR die ('Could not connect to MySQL: '.mysql_error());
