@@ -1,19 +1,12 @@
 <?php
 session_start ();
 
-function test_input($data) {
-	$data = trim($data);
-	$data = stripslashes($data);
-	$data = htmlspecialchars($data);
-	return $data;
-}
-
 include("../connectDB.php");
 $conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 OR die ('Could not connect to MySQL: '.mysql_error());
 $aid=0;
 if ($_SERVER ['REQUEST_METHOD'] == "POST") {
-	$adesc = htmlentities(test_input($_POST["adesc"]));
+	$adesc = htmlentities($_POST["adesc"]);
 
 	//$_adesc = mysql_real_escape_string($_POST["adesc"]);
 	

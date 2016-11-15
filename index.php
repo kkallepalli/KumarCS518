@@ -11,6 +11,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Stack Exchange</title>
+<link rel="icon" href='./images/icon.png'>
 <link rel="stylesheet" href="css/bootstrap.min.css">
 <link href="http://fonts.googleapis.com/css?family=Montserrat"
 	rel="stylesheet" type="text/css">
@@ -55,6 +56,25 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	margin-bottom: 0px;
 	font-size: 14px;
 	color: #FFFFFF;
+}
+
+/* Satya: code for search */
+div.searchResults {
+    display: none;
+    position: absolute;
+    top: 40px;
+    left: 1230px;
+    color: black;
+    background: #dde2d9;
+    border: 1px solid #ccc;
+    border-top-color: #d9d9d9;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    -webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    opacity: 1;
+    z-index:1000;
+    width: 206px;
+    height: 120px;
+    
 }
 </style>
 <script type="text/javascript">
@@ -175,6 +195,7 @@ function showLogout()
 	$("#registerLink").hide();
 	$('#myQuesSection').css('opacity', '1');
 	$('#recommendationPanel').show();
+	$('#search-people').show();
 
 }
 function showMyQuestions()
@@ -443,7 +464,56 @@ $( "#tags" ).autocomplete({
     source: availableTags
   });
 $( "#ui-id-1").attr("style","z-index:1050");
+
+/* satya code for user search */
+$("body").click(function(){
+	$("#searchResults").hide();
+	$("#search-people").val("");
 });
+
+
+});
+
+/* satya code for user search */
+function peopleSearch()
+{
+
+	var MIN_LENGTH = 1;
+	var keyword = $("#search-people").val();
+			var data={};
+			data["keyword"] = keyword;
+			if (keyword.length >= MIN_LENGTH){
+				$.ajax({
+			          type: "post",
+			          url: "services/SearchPeople.php",
+			          data: data,
+			          contentType: "application/x-www-form-urlencoded",
+			          success: function(responseData, textStatus, jqXHR) {
+				        
+						    
+						var persons = responseData.split("-");
+						  var searchDiv = $("#searchResults");
+						  var usersStr="";
+						  for(var i=0; i<persons.length; i++){
+							  usersStr+="<li><a href='./profile.php?uid="+persons[i].split("|")[1]+"'>"+persons[i].split("|")[0]+"</a></li>";  
+			          		}
+			          	
+			          		searchDiv.html(usersStr);
+			          		$('#searchResults').show();
+			          },
+			          error: function(jqXHR, textStatus, errorThrown) {
+			              alert("No match found!");
+			              console.log(jqXHR+":"+errorThrown);
+			         	 }
+			      });
+			}
+			else{
+				$('#searchResults').hide();
+			} 
+} 
+
+
+
 </script>
 </head>
 <body onload="showMyQuestions();">
@@ -461,7 +531,10 @@ $( "#ui-id-1").attr("style","z-index:1050");
 					data-toggle='modal' data-target='#myPostModal'>Post</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
-		<li id="registerLink"><a data-toggle='modal' data-target='#regModal' style='cursor: hand;'>Register</a></li>
+				<!-- satya code for user search -->
+				<li style="margin-top: 7px;"><input class="form-control" style="display: none; background-color:#dde2d9 ; color: black; position:relative" type="text" placeholder = "Search People" id="search-people" onkeyup="peopleSearch()"></input></li>
+				<div id="searchResults" class="searchResults"></div>
+				<li id="registerLink"><a data-toggle='modal' data-target='#regModal' style='cursor: hand;'>Register</a></li>
 				<li id='profileLink'
 					style="display: none; cursor: hand; color: white;"><a id="profileHref" href=""> Welcome,<?php echo $_SESSION["username"]; ?> </a></li>
 				<li id='loginLink'><a data-toggle='modal' data-target='#myModal'
@@ -902,6 +975,5 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 	<div class="container footer-line">
 		<p>Project for CS518 - Developed by Kumar,Surabhi,Satya - 2016</p>
 	</div>
-
 </body>
 </html>
