@@ -27,13 +27,15 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 			$errors [] = "extension not allowed, please choose a JPEG or PNG file.";
 		}
 		
+		echo "<script>alert(".$file_size.");</script>";
 		if ($file_size > 2097152) {
 			$errors [] = 'File size must be excately 2 MB';
 		}
 		
-		if (empty ( $errors ) == true) {
+		if (count ( $errors ) === 0) {
 			$status=move_uploaded_file ( $file_tmp, "profiles/" . $new_file_name );
-			echo "Status of file uplaod:".$status;
+			
+			echo "Status of file:".$status;
 			
 			$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 			OR die ('Could not connect to MySQL: '.mysql_error());
@@ -52,8 +54,10 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	}
 }
 ?>
+<!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Stack Exchange</title>
 <link rel="icon" href='./images/icon.png'>
@@ -124,7 +128,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 		style="background-color: #4d636f; color: white;">
 		<div class="container-fluid">
 			<div class="navbar-header">
-				<img class="navbar-brand" src='./images/FoodieLogo.png'
+				<img class="navbar-brand" src='./images/FoodieLogo.png' alt="foodie"
 					style="padding: 5px 10px;">
 			</div>
 			<ul class="nav navbar-nav">
@@ -148,7 +152,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 
 	<div class="row" style="margin: 0px;">
 		<div class="col-sm-3">
-			<form action="">
+			<form action="#">
       	<?php
 						$conn = mysqli_connect ( DB_HOST, DB_USER, DB_PASSWORD, DB_NAME ) or die ( 'Could not connect to MySQL: ' . mysql_error () );
 						$sql = "SELECT uid, firstname, lastname, address, email, contact, username, password, upic, created_on FROM user where uid='" . $_GET["uid"] . "'";
@@ -176,8 +180,8 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 			<form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"])."?uid=".$_SESSION["uid"];?>" method="post"
 				enctype="multipart/form-data">
 				<div class="form-group">
-					<img border='0' width='150' height='160'
-						src="<?php echo $userpicpath;?>" />
+					<img width='150' height='160'
+						src="<?php echo $userpicpath;?>"  alt="profile" />
 				</div>
 				<div class="form-group">
 					<input class="input-group" type="file" name="image"
@@ -231,7 +235,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 								<div class='col-sm-2'>
 								Value <a href='#'><span class='badge'>".$row["value"]."</span></a>
 								Answers <a href='#'><span class='badge'>" .$row["answers"]."</span></a></div>
-						  		<div class='col-sm-3'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><br>".$row ["username"]."</div>
+						  		<div class='col-sm-3'><img src='".$picurl."' width='50' height='50'  class='img-circle img-responsive' alt='profile'><br>".$row ["username"]."</div>
 						  		</div>
 								<div id='mycollapse" . ($x + 1) . "' class='post-footer collapse'><div class='list-group'>";
 						
@@ -258,7 +262,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 								$y = 0;
 								if($bestansid>0)
 								{
-									$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$bestrow["adesc"]."</div><div class='col-sm-2'><img src='".$bestrow["upic"]."' width='50px' height='50px'  class='img-circle img-responsive'' ><b>".$bestrow["username"]."</b></div><a href='#'class='col-sm-1'>".$bestrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$bestrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a><div class='col-sm-2'><img  class='img-responsive' width='24px' height='24px' src='./images/bestans.png' ></div></div>";
+									$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$bestrow["adesc"]."</div><div class='col-sm-2'><img src='".$bestrow["upic"]."' width='50' height='50'  class='img-circle img-responsive' alt='profile' ><b>".$bestrow["username"]."</b></div><a href='#' class='col-sm-1'>".$bestrow["upvotes"]."<img width='24' height='24' src='./images/thumb-up-outline.png' alt='up'></a><a href='#' class='col-sm-1'>".$bestrow["downvotes"]."<img width='24' height='24' src='./images/thumb-down-outline.png' alt='down'></a><div class='col-sm-2'><img  class='img-responsive' width='24' height='24' src='./images/bestans.png' alt='best'></div></div>";
 									$y=$y+1;
 								}
 								while ( $ansrow = mysqli_fetch_assoc ( $rs2 ) ) {
@@ -272,11 +276,11 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 										
 										if($bestansid>0)
 										{
-											$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' > <b>".$ansrow["username"]."</b></div><a href='#' class='col-sm-1'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a></div>";
+											$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50' height='50'  class='img-circle img-responsive' alt='profile' > <b>".$ansrow["username"]."</b></div><a href='#' class='col-sm-1'>".$ansrow["upvotes"]."<img width='24' height='24' src='./images/thumb-up-outline.png' alt='up'></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24' height='24' src='./images/thumb-down-outline.png' alt='down'></a></div>";
 										}
 										else
 										{
-											$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><b>".$ansrow["username"]."</b></div><a href='#'class='col-sm-1'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a><div class='col-sm-2'><button onclick='submitBestAns(".$ansrow["aid"].")'>Mark</button></div></div>";
+											$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50' height='50'  class='img-circle img-responsive' alt='profile'><b>".$ansrow["username"]."</b></div><a href='#' class='col-sm-1'>".$ansrow["upvotes"]."<img width='24' height='24' src='./images/thumb-up-outline.png' alt='up'></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24' height='24' src='./images/thumb-down-outline.png' alt='down'></a><div class='col-sm-2'><button onclick='submitBestAns(".$ansrow["aid"].")'>Mark</button></div></div>";
 										}
 									}
 								}

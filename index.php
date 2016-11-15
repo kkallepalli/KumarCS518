@@ -5,8 +5,10 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	$_SESSION["username"]=$_POST["email"];
 }
 ?>
+<!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Stack Exchange</title>
 <link rel="icon" href='./images/icon.png'>
@@ -88,6 +90,9 @@ div.searchResults {
 <script type="text/javascript">
 var uname="";
  var recQid='<?php echo $_SESSION["recQid"]; ?>';
+
+var topQuesCount=0;
+var topQuesPage=1;
 
 /* Satya: Code for user registration: */
 function regUser()
@@ -365,6 +370,103 @@ function loadRecommendations(uid,eventid,qid)
 	      });
 }
 
+function showTopQuesPagination(currpage,lastpage,uid)
+{
+	$("#topQuesPages").empty();
+	var end=currpage+2;
+	var start=currpage-2;
+	if(end>lastpage)
+	{
+		end=lastpage;
+		}
+
+	if(start<1)
+	{
+		start=1;
+		}
+
+	
+	for(var i=start;i<=end;i++)
+	{
+		if(i==currpage)
+		{
+			$("#topQuesPages").append("<li class='active'><a href='javascript:openTopQuesPage("+i+","+uid+","+lastpage+")'>"+i+"</a></li>");
+			}
+		else
+		{
+			$("#topQuesPages").append("<li><a href='javascript:openTopQuesPage("+i+","+uid+","+lastpage+")'>"+i+"</a></li>");
+		}
+	}
+}
+
+function openTopQuesPage(pgno,uid,lastpage)
+	{
+	var postData ="uid="+ uid+"&pgno="+pgno+"&totalPages="+lastpage;
+	$.ajax({
+          type: "post",
+          url: "services/GetTopQuestions.php",
+          data: postData,
+          contentType: "application/x-www-form-urlencoded",
+          success: function(responseData, textStatus, jqXHR) {
+			console.log(responseData);
+			$("#topQuestionHolder").empty();
+			$("#topQuestionHolder").append(responseData);
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+              alert("Error get page data!! Try again");
+          }
+      });
+	}
+
+function showTopAnsPagination(secid,currpage,lastpage,qid)
+{
+	$("#topAnsPages"+secid).empty();
+	var end=currpage+2;
+	var start=currpage-2;
+	if(end>lastpage)
+	{
+		end=lastpage;
+		}
+
+	if(start<1)
+	{
+		start=1;
+		}
+
+	
+	for(var i=start;i<=end;i++)
+	{
+		if(i==currpage)
+		{
+			$("#topAnsPages"+secid).append("<li class='active'><a href='javascript:openTopAnsPage("+secid+","+i+","+qid+","+lastpage+")'>"+i+"</a></li>");
+			}
+		else
+		{
+			$("#topAnsPages"+secid).append("<li><a href='javascript:openTopAnsPage("+secid+","+i+","+qid+","+lastpage+")'>"+i+"</a></li>");
+		}
+	}
+}
+
+function openTopAnsPage(secid,pgno,qid,lastpage)
+	{
+	var postData ="qid="+ qid+"&pgno="+pgno+"&totalPages="+lastpage+"&secid="+secid;
+	$.ajax({
+          type: "post",
+          url: "services/GetTopAnswers.php",
+          data: postData,
+          contentType: "application/x-www-form-urlencoded",
+          success: function(responseData, textStatus, jqXHR) {
+			console.log(responseData);
+			$("#ansSection"+secid).empty();
+			$("#ansSection"+secid).append(responseData);
+// 			$('#collapse'+secid).collapse();
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+              alert("Error get page data!! Try again");
+          }
+      });
+	}
+
 $(function() {
 var availableTags = ["Indian","Chinese","French","Greek","Italian","Thai","Mediterrian","American","Continental","Cuban","Mexican","Malaysian","Singapore","Spanish"];
 
@@ -429,7 +531,7 @@ function peopleSearch()
 		style="background-color: #4d636f; color: white;">
 		<div class="container-fluid">
 			<div class="navbar-header">
-				<img class="navbar-brand" src='./images/FoodieLogo.png'
+				<img class="navbar-brand" src='./images/FoodieLogo.png' alt="foodie"
 					style="padding: 5px 10px;">
 			</div>
 			<ul class="nav navbar-nav">
@@ -453,7 +555,7 @@ function peopleSearch()
 	</nav>
 
 	<div id="aboutUs" style="min-height: 80vh; padding: 10px;">
-		<img src='./images/aboutus.png' class="img-responsive">
+		<img src='./images/aboutus.png' class="img-responsive" alt="about us">
 
 		<div class="jumbotron" style="background-color: #dcdcdc;">
 			"One stop to get all your food related questions answered by experts.
@@ -484,7 +586,7 @@ function peopleSearch()
 			$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;' >
 		<div class='row post'>
 		<div class='col-sm-7'>
-			<p class='title' style='cursor: hand;' data-toggle='modal' data-target='#myModal'' >" . $row ["qtitle"] . "</p>
+			<p class='title' style='cursor: hand;' data-toggle='modal' data-target='#myModal' >" . $row ["qtitle"] . "</p>
 			<p>".$row["qcontent"]."</p>
 		</div>
 		<div class='col-sm-2'>
@@ -492,7 +594,7 @@ function peopleSearch()
 		Down: <span class='badge'>".$row["votesdown"]."</span>
 		Answers <a href='#'><span  class='badge'>" .$row["answers"]."</span></a>
 		</div>
-  		<div class='col-sm-3'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><br>".$row ["username"]."</div>
+  		<div class='col-sm-3'><img src='".$picurl."' width='50' height='50'  class='img-circle img-responsive' alt='profilepic'><br>".$row ["username"]."</div>
   		</div>";
 			$postinfo = $postinfo . "</div>";
 			echo $postinfo;
@@ -506,25 +608,48 @@ function peopleSearch()
 		<div class="row" style="padding: 5px; margin:0px;background-color: #1b427;display:none;" id="topbar">
 				<input type="text" id="search-criteria" onkeydown="" />
 				<button id="search" type="button" class="btn btn-default btn-sm" onclick="searchPosts()">
-         		<img src="images/magnify.png">
+         		<img src="images/magnify.png" alt="magnify">
         		</button>
         		<button id="clearSearch" type="button" class="btn btn-default btn-sm" onclick="clearSearchResults()">
-         		<img src="images/close-circle.png">
+         		<img src="images/close-circle.png" alt="close">
         		</button>
-        		<button id="sortTimeAesc" type="button" class="btn btn-default btn-sm" onclick="sortTopQuestions(1)">
-         		<img src="images/sort-ascending.png">
+        		<ul id="topQuesPages" class="pagination" style="display: inline;">
+					  <li class="active"><a href="#" >1</a></li>
+					  <li ><a href="#">2</a></li>
+					  <li><a href="#">3</a></li>
+					  <li><a href="#">4</a></li>
+					  <li><a href="#">5</a></li>
+				</ul>
+				<input type="hidden" id="topQuesPageNo" value="" />
+        	<!-- <button id="sortTimeAesc" type="button" class="btn btn-default btn-sm" onclick="sortTopQuestions(1)">
+         		<img src="images/sort-ascending.png" alt="ascending">
         		</button>
         		<button id="sortTimeDesc" type="button" class="btn btn-default btn-sm" onclick="sortTopQuestions(2)">
-         		<img src="images/sort-descending.png">
+         		<img src="images/sort-descending.png" alt="descending">
         		</button>
         		<label class="radio-inline"><input type="radio" name="optradio" checked="checked">Date</label>
-				<label class="radio-inline"><input type="radio" name="optradio">Score</label>
+				<label class="radio-inline"><input type="radio" name="optradio">Score</label> -->	
 		 </div>
+		 <div id="topQuestionHolder">
 <?php
 function showTopPosts($uid) {
+	$pgno=$_SESSION["pgno"];
+	$totalPages=0;
+	if($pgno==null)
+	{
+		$pgno=1;
+	}
 	$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 	OR die ('Could not connect to MySQL: '.mysql_error());
-	$sql1 = "SELECT Q.qid,qtitle,qcontent,U.upic,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid." order by value desc";
+	
+	$sqlcount="SELECT count(*) as count from question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid;
+	$rs2 = mysqli_query($conn,$sqlcount);
+	while ( $row = mysqli_fetch_assoc ( $rs2 ) ) {
+		$totalPages=ceil($row["count"]/5);
+	}
+	
+	echo "<script type='text/javascript'>showTopQuesPagination(".$pgno.",".$totalPages.",".$uid.");</script>";
+	$sql1 = "SELECT Q.qid,qtitle,qcontent,U.upic,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
 	if(!$conn)
 	{
 		echo "error";
@@ -540,7 +665,7 @@ function showTopPosts($uid) {
 		$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;' >
 		<div class='row post top-posts'>
 		<div class='col-sm-7'>
-			<p class='title' style='cursor: hand;' data-toggle='collapse' data-target='#collapse" . ($x + 1) . "' >" . $row ["qtitle"] . "</p> 
+			<p class='title' style='cursor: hand;' data-toggle='collapse' data-target=#collapse" . ($x + 1) . ">" . $row ["qtitle"] . "</p> 
 			<p id='myDesc".($x + 1)."'>".$row["qcontent"]."</p>";
 					if($row["tags"]!=null)
 								{
@@ -551,13 +676,21 @@ function showTopPosts($uid) {
 		Up: <span id='qVoteUp".$row["qid"]."' class='badge'>".$row["votesup"]."</span>
 		Down: <span id='qVoteDown".$row["qid"]."' class='badge'>".$row["votesdown"]."</span>
 		Answers <a href='#'><span id='qanswers".$row["qid"]."' class='badge'>" .$row["answers"]."</span></a>
-		
 		</div>
   		<div class='col-sm-3'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><!--<p style='word-wrap: break-word;'>Posted by:<br>--><p style='padding: 5px;'>".$row ["username"]."</p><p style='font-size: 12px;color: #0096e1;font-weight: bold;'>".$row ["created_date"]."</p></div>
-  		</div>
-		<div id='collapse".($x + 1) ."' class='post-footer collapse'><div class='list-group'><div class='list-group-item row' style='margin:0px;'><a href='javascript:voteQuestion(1,".$row["qid"].")'><img width='24px' height='24px' src='./images/ques-up.png'></a>
-			<a href='javascript:voteQuestion(-1,".$row["qid"].")'><img width='24px' height='24px' src='./images/ques-down.png' ></a></div>";
-		$sql2="SELECT A.aid,A.adesc,U.upic,U.username,A.best_ans,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"]." order by value desc";
+  		</div><div id='ansSection".($x + 1)."'>";
+			
+		$anspages=0;
+		$sqlanscount="SELECT count(*) as count from answers A WHERE A.qid=".$row["qid"];
+		$rsans = mysqli_query($conn,$sqlanscount);
+		while ( $countrow = mysqli_fetch_assoc ( $rsans ) ) {
+			$anspages=ceil($countrow["count"]/5);
+		}
+		
+		$postinfo =	$postinfo."<div id='collapse".($x + 1) ."' class='post-footer collapse'><div class='list-group'><div class='list-group-item row' style='margin:0px;'><a href='javascript:voteQuestion(1,".$row["qid"].")'><img width='24px' height='24px' src='./images/ques-up.png'></a>
+			<a href='javascript:voteQuestion(-1,".$row["qid"].")'><img width='24px' height='24px' src='./images/ques-down.png' ></a><ul id='topAnsPages".($x + 1)."' class='pagination' style='display: inline;'></ul></div>";
+		
+		$sql2="SELECT A.aid,A.adesc,U.upic,U.username,A.best_ans,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"]." order by value desc limit 0,5";
 		$rs2 = mysqli_query($conn,$sql2);
 		$bestansid=0;
 		$bestrow="";
@@ -595,8 +728,9 @@ function showTopPosts($uid) {
 				}
 			}
 		$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='comment".($x + 1)."' onclick='event.stopPropagation()'></textarea><input type='button' value='Submit' onclick='saveAnswer(1,".($x+1).",".$row["qid"].")'></div>";
-		$postinfo = $postinfo . "</div></div></div>";
+		$postinfo = $postinfo . "</div></div></div></div>";
 		echo $postinfo;
+		echo "<script type='text/javascript'>showTopAnsPagination(".($x + 1).",1,".$anspages.",".$row["qid"].");</script>";
 		$y = $y + 1;
 		$x = $x + 1;
 	}
@@ -641,6 +775,7 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 	echo "<script type='text/javascript'>document.getElementById('profileHref').href='./profile.php?uid=". $uid . "';</script>";
 }
 ?>
+</div>
 </div>
 		<div class="col-sm-6">
 			<div class="row">
@@ -705,7 +840,7 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 								$y = 0;
 								if($bestansid>0)
 								{
-									$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$bestrow["adesc"]."</div><div class='col-sm-2'><img src='".$bestrow["upic"]."' width='50px' height='50px'  class='img-circle img-responsive'' ><b>".$bestrow["username"]."</b></div><a href='#'class='col-sm-1'>".$bestrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$bestrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a><div class='col-sm-2'><img  class='img-responsive' width='24px' height='24px' src='./images/bestans.png' ></div></div>";
+									$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$bestrow["adesc"]."</div><div class='col-sm-2'><img src='".$bestrow["upic"]."' width='50px' height='50px'  class='img-circle img-responsive' ><b>".$bestrow["username"]."</b></div><a href='#'class='col-sm-1'>".$bestrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$bestrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a><div class='col-sm-2'><img  class='img-responsive' width='24px' height='24px' src='./images/bestans.png' ></div></div>";
 									$y=$y+1;
 								}
 								while ( $ansrow = mysqli_fetch_assoc ( $rs2 ) ) {
@@ -719,11 +854,11 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 										
 										if($bestansid>0)
 										{
-											$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' > <b>".$ansrow["username"]."</b></div><a href='#' class='col-sm-1'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a></div>";
+											$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'> <b>".$ansrow["username"]."</b></div><a href='#' class='col-sm-1'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a></div>";
 										}
 										else
 										{
-											$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><b>".$ansrow["username"]."</b></div><a href='#'class='col-sm-1'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a><div class='col-sm-2'><button onclick='submitBestAns(".$ansrow["aid"].")'>Mark</button></div></div>";
+											$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive' ><b>".$ansrow["username"]."</b></div><a href='#'class='col-sm-1'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a><div class='col-sm-2'><button onclick='submitBestAns(".$ansrow["aid"].")'>Mark</button></div></div>";
 										}
 									}
 								}
