@@ -61,9 +61,12 @@ div.searchResults {
     display: none;
     position: absolute;
     top: 40px;
-    left: 1230px;
-    color: black;
-    background: #dde2d9;
+    left: none;
+    font-size:12px;
+    color: #0096e1;
+    font-weight: bold;
+    background: white;
+    /* padding: 10px; */
     border: 1px solid #ccc;
     border-top-color: #d9d9d9;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
@@ -71,7 +74,14 @@ div.searchResults {
     opacity: 1;
     z-index:1000;
     width: 206px;
-    height: 120px;
+}
+
+#searchResults li{
+    padding:5px;
+    
+}
+#searchResults li:hover{
+    background-color:#dbe8fc;
     
 }
 </style>
