@@ -27,7 +27,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 			$errors [] = "extension not allowed, please choose a JPEG or PNG file.";
 		}
 		
-		echo "<script>alert(".$file_size.");</script>";
+		//echo "<script>alert(".$file_size.");</script>";
 		if ($file_size > 2097152) {
 			$errors [] = 'File size must be excately 2 MB';
 		}
@@ -35,7 +35,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 		if (count ( $errors ) === 0) {
 			$status=move_uploaded_file ( $file_tmp, "profiles/" . $new_file_name );
 			
-			echo "Status of file:".$status;
+			//echo "Status of file:".$status;
 			
 			$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 			OR die ('Could not connect to MySQL: '.mysql_error());

@@ -63,7 +63,6 @@ div.searchResults {
     display: none;
     position: absolute;
     top: 40px;
-    left: 1230px;
     color: black;
     background: #dde2d9;
     border: 1px solid #ccc;
@@ -449,7 +448,7 @@ function openTopAnsPage(secid,pgno,qid,lastpage)
 			console.log(responseData);
 			$("#ansSection"+secid).empty();
 			$("#ansSection"+secid).append(responseData);
-// 			$('#collapse'+secid).collapse();
+			$("#collapse"+secid).collapse({"toggle:":true});
           },
           error: function(jqXHR, textStatus, errorThrown) {
               alert("Error get page data!! Try again");
