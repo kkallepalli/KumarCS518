@@ -20,6 +20,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
 <script src="js/jquery.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="js/bootstrap.min.js"></script>
 <style type="text/css">
@@ -87,6 +88,7 @@ div.searchResults {
     
 }
 </style>
+ <script>tinymce.init({ selector:'textarea',plugins : 'image' });</script>
 <script type="text/javascript">
 var uname="";
  var recQid='<?php echo $_SESSION["recQid"]; ?>';
@@ -163,10 +165,10 @@ function saveAnswer(type,x,qid)
 	var desc="";
 	if(type==1)
 	{
-		desc=$("#comment"+x).val();
+		desc=tinymce.get("comment"+x).getContent()
 		}else
 		{
-			desc=$("#mycomment"+x).val();
+			desc=tinymce.get("mycomment"+x).getContent()
 		}
 	 
 	var postData = "uname="+ uname+"&qid="+qid+"&adesc="+desc;
@@ -190,7 +192,6 @@ function saveAnswer(type,x,qid)
 		{
 			$("#mycomment"+x).val("");
 		}
-	
 }
 
 function showLogout()
@@ -411,6 +412,16 @@ function openTopQuesPage(pgno,uid,lastpage)
 			console.log(responseData);
 			$("#topQuestionHolder").empty();
 			$("#topQuestionHolder").append(responseData);
+
+			//tinymce.init({ selector:'textarea',plugins : 'image' });
+			var commentBox=$("#topQuestionHolder").find("textarea");
+		tinymce.remove();
+		tinymce.init({ selector:'textarea',plugins : 'image' });
+
+// 			for(var i=1;i<=commentBox.length;i++)
+// 				{
+// 					alert(" i : "+i);
+// 				}
           },
           error: function(jqXHR, textStatus, errorThrown) {
               alert("Error get page data!! Try again");
@@ -456,7 +467,7 @@ function openTopAnsPage(secid,pgno,qid,lastpage)
           data: postData,
           contentType: "application/x-www-form-urlencoded",
           success: function(responseData, textStatus, jqXHR) {
-			console.log(responseData);
+			//console.log(responseData);
 			$("#ansSection"+secid).empty();
 			$("#ansSection"+secid).append(responseData);
 			$("#collapse"+secid).collapse({"toggle:":true});
@@ -487,7 +498,6 @@ $("body").click(function(){
 /* satya code for user search */
 function peopleSearch()
 {
-
 	var MIN_LENGTH = 1;
 	var keyword = $("#search-people").val();
 			var data={};
@@ -547,6 +557,7 @@ function peopleSearch()
 				<li id="registerLink"><a data-toggle='modal' data-target='#regModal' style='cursor: hand;'>Register</a></li>
 				<li id='profileLink'
 					style="display: none; cursor: hand; color: white;"><a id="profileHref" href=""> Welcome,<?php echo $_SESSION["username"]; ?> </a></li>
+				<li id="helpLink"><a style='cursor: hand;'>Help</a></li>
 				<li id='loginLink'><a data-toggle='modal' data-target='#myModal'
 					style='cursor: hand;'>Login</a></li>
 				<li id='logoutLink' style="display: none;"><a href="logout.php">Logout</a></li>
@@ -649,7 +660,7 @@ function showTopPosts($uid) {
 	}
 	
 	echo "<script type='text/javascript'>showTopQuesPagination(".$pgno.",".$totalPages.",".$uid.");</script>";
-	$sql1 = "SELECT Q.qid,qtitle,qcontent,U.upic,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
+	$sql1 = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
 	if(!$conn)
 	{
 		echo "error";
@@ -712,7 +723,7 @@ function showTopPosts($uid) {
 		$y = 0;
 		if($bestansid>0)
 		{
-			$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$bestrow["adesc"]."</div><div class='col-sm-2'><img src='".$bestrow["upic"]."' width='50px' height='50px'  class='img-circle img-responsive'' ><b>".$bestrow["username"]."</b></div><div class='col-sm-1'><span id='qAnsUp".$bestrow["aid"]."'>".$bestrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$bestrow["aid"].",".$row["qid"].")'></div><div class='col-sm-1' style='cursor:hand;'><span id='qAnsDown".$bestrow["aid"]."'>".$bestrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$bestrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div><div class='col-sm-2'><img  class='img-responsive' width='24px' height='24px' src='./images/bestans.png' ></div></div>";
+			$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".html_entity_decode($bestrow["adesc"])."</div><div class='col-sm-2'><img src='".$bestrow["upic"]."' width='50px' height='50px'  class='img-circle img-responsive'' ><b>".$bestrow["username"]."</b></div><div class='col-sm-1'><span id='qAnsUp".$bestrow["aid"]."'>".$bestrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$bestrow["aid"].",".$row["qid"].")'></div><div class='col-sm-1' style='cursor:hand;'><span id='qAnsDown".$bestrow["aid"]."'>".$bestrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$bestrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div><div class='col-sm-2'><img  class='img-responsive' width='24px' height='24px' src='./images/bestans.png' ></div></div>";
 			$y=$y+1;
 		}
 		while ( $ansrow = mysqli_fetch_assoc ( $rs2 ) ) {
@@ -724,10 +735,15 @@ function showTopPosts($uid) {
 						$picurl="profiles/".$ansrow["upic"];
 					}
 					
-					$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><b>".$ansrow["username"]."</b></div><div class='col-sm-1'><span id='qAnsUp".$ansrow["aid"]."'>".$ansrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$ansrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div><div class='col-sm-1'><span id='qAnsDown".$bestrow["aid"]."'>".$ansrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$ansrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div></div>";
+					$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".html_entity_decode($ansrow["adesc"])."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><b>".$ansrow["username"]."</b></div><div class='col-sm-1'><span id='qAnsUp".$ansrow["aid"]."'>".$ansrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$ansrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div><div class='col-sm-1'><span id='qAnsDown".$bestrow["aid"]."'>".$ansrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$ansrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div></div>";
 				}
 			}
+		
+		if($row["freeze"]==0)
+		{
 		$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='comment".($x + 1)."' onclick='event.stopPropagation()'></textarea><input type='button' value='Submit' onclick='saveAnswer(1,".($x+1).",".$row["qid"].")'></div>";
+		}
+
 		$postinfo = $postinfo . "</div></div></div></div>";
 		echo $postinfo;
 		echo "<script type='text/javascript'>showTopAnsPagination(".($x + 1).",1,".$anspages.",".$row["qid"].");</script>";
@@ -790,7 +806,7 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 						if ($uid != 0) {
 							$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 							OR die ('Could not connect to MySQL: '.mysql_error());
-							$sql = "SELECT Q.qid,qtitle,qcontent,U.upic,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc";
+							$sql = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc";
 							$rs = mysqli_query ($conn,$sql );
 							$x = 0;
 							while ( $row = mysqli_fetch_assoc ( $rs ) ) {
@@ -858,11 +874,20 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 										}
 										else
 										{
+											if($row["freeze"]==0)
+											{
 											$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive' ><b>".$ansrow["username"]."</b></div><a href='#'class='col-sm-1'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a><div class='col-sm-2'><button onclick='submitBestAns(".$ansrow["aid"].")'>Mark</button></div></div>";
+											}
+											else {
+											$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive' ><b>".$ansrow["username"]."</b></div><a href='#'class='col-sm-1'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a><div class='col-sm-2'></div></div>";
+											}
 										}
 									}
 								}
+								if($row["freeze"]==0)
+								{
 								$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='mycomment".($x + 1)."' onclick='event.stopPropagation()'></textarea><input type='button' value='Submit' onclick='saveAnswer(2,".($x+1).",".$row["qid"].")'></div>";
+								}
 								$postinfo = $postinfo . "</div></div></div>";
 								echo $postinfo;
 								$y = $y + 1;
