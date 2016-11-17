@@ -471,6 +471,8 @@ function openTopAnsPage(secid,pgno,qid,lastpage)
 			$("#ansSection"+secid).empty();
 			$("#ansSection"+secid).append(responseData);
 			$("#collapse"+secid).collapse({"toggle:":true});
+		tinymce.remove();
+		tinymce.init({ selector:'textarea',plugins : 'image' });
           },
           error: function(jqXHR, textStatus, errorThrown) {
               alert("Error get page data!! Try again");
