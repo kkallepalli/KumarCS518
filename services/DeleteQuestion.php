@@ -13,9 +13,6 @@ if (isset($_POST['submit']))
 	$tagid = "SELECT tag_id from tags WHERE tag_id =".$tag_id;
 	$answer = "SELECT qid from answers WHERE qid= ".$qid;
 	$question_tag = "SELECT qid_fk from question_tag WHERE qid_fk =".$qid;
-
-	mysql_query("DELETE FROM tags WHERE tag_id = '$tagid'")
-	or die(mysql_error());
 	
 	mysql_query("DELETE FROM question_tag WHERE qid_fk = '$question_tag'")
 	or die(mysql_error());

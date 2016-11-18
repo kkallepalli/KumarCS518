@@ -480,6 +480,50 @@ function openTopAnsPage(secid,pgno,qid,lastpage)
       });
 	}
 
+function deleteQuestion(qid)
+{
+alert("del: "+qid);
+}
+
+function editQuestion(qid,x)
+{
+$("#postEditTitle").val($("#myTitle"+x).text());
+$("#updateQid").val(qid);
+tinymce.get('postEditContent').getBody().innerHTML=$("#myDesc"+x).html();
+//tinyMCE.DOM.setHTML("postEditContent",$("#myDesc"+x).text());
+$("#myEditModal").modal("show");
+$("#xValue").val(x);
+}
+
+function updatePost()
+{
+var postData ="qid="+ $("#updateQid").val()+"&qContent="+tinymce.get('postEditContent').getBody().innerHTML+"&qTitle="+$("#postEditTitle").val();
+	$.ajax({
+          type: "post",
+          url: "services/EditQuestion.php",
+          data: postData,
+          contentType: "application/x-www-form-urlencoded",
+          success: function(responseData, textStatus, jqXHR) {
+			console.log(responseData);
+			$("#myEditModal").modal("hide");	
+// 			$("#myTitle"+$("#xValue").val()).text($("#postEditTitle").val());
+// 			$("#myDesc"+$("#xValue").val()).text(tinymce.get('postEditContent').getBody().innerHTML);
+			$("#postEditTitle").val("");
+			tinymce.get('postEditContent').getBody().innerHTML="";
+			location.reload();
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+              alert("Error get page data!! Try again");
+          }
+      });
+
+}
+
+function freezeQuestion(qid)
+{
+alert("freeze: "+qid);
+}
+
 $(function() {
 var availableTags = ["Indian","Chinese","French","Greek","Italian","Thai","Mediterrian","American","Continental","Cuban","Mexican","Malaysian","Singapore","Spanish"];
 
@@ -533,9 +577,6 @@ function peopleSearch()
 				$('#searchResults').hide();
 			} 
 } 
-
-
-
 </script>
 </head>
 <body onload="showMyQuestions();">
@@ -662,7 +703,7 @@ function showTopPosts($uid) {
 	}
 	
 	echo "<script type='text/javascript'>showTopQuesPagination(".$pgno.",".$totalPages.",".$uid.");</script>";
-	$sql1 = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
+	$sql1 = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
 	if(!$conn)
 	{
 		echo "error";
@@ -678,19 +719,27 @@ function showTopPosts($uid) {
 		$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;' >
 		<div class='row post top-posts'>
 		<div class='col-sm-7'>
-			<p class='title' style='cursor: hand;' data-toggle='collapse' data-target=#collapse" . ($x + 1) . ">" . $row ["qtitle"] . "</p> 
-			<p id='myDesc".($x + 1)."'>".$row["qcontent"]."</p>";
+			<p id='myTitle".($x + 1)."' class='title' style='cursor: hand;' data-toggle='collapse' data-target=#collapse" . ($x + 1) . ">" . $row ["qtitle"] . "</p> 
+			<div id='myDesc".($x + 1)."'>".$row["qcontent"]."</div>";
 					if($row["tags"]!=null)
 								{
 									$postinfo = $postinfo ."<a href='#' style='background-color: #5bc0de;color:#ffffff;padding: 5px;'>".$row["tags"]."</a>";
 								}
+								
+		if(!empty($_SESSION["role"]))
+		{
+			if($_SESSION["role"]==1)
+			{
+			$postinfo	=	$postinfo."<button id='deleteBtn' type='button' class='btn btn-default btn-sm' onclick='deleteQuestion(".$row["qid"].")'><img src='images/close-circle.png'></button><button id='editBtn' type='button' class='btn btn-default btn-sm' onclick='editQuestion(".$row["qid"].",".($x + 1).")'><img src='images/edit-button.png'></button><button id='freezeBtn' type='button' class='btn btn-default btn-sm' onclick='freezeQuestion(".$row["qid"].")'><img src='images/freeze-image.png'></button>";
+			}
+		}
 		$postinfo =	$postinfo."</div>
 		<div class='col-sm-2'>
 		Up: <span id='qVoteUp".$row["qid"]."' class='badge'>".$row["votesup"]."</span>
 		Down: <span id='qVoteDown".$row["qid"]."' class='badge'>".$row["votesdown"]."</span>
 		Answers <a href='#'><span id='qanswers".$row["qid"]."' class='badge'>" .$row["answers"]."</span></a>
 		</div>
-  		<div class='col-sm-3'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><!--<p style='word-wrap: break-word;'>Posted by:<br>--><p style='padding: 5px;'>".$row ["username"]."</p><p style='font-size: 12px;color: #0096e1;font-weight: bold;'>".$row ["created_date"]."</p></div>
+  		<div class='col-sm-3'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><!--<p style='word-wrap: break-word;'>Posted by:<br>--><p style='padding: 5px;'>".$row ["username"]." [".$row ["score"]."] </p><p style='font-size: 12px;color: #0096e1;font-weight: bold;'>".$row ["created_date"]."</p></div>
   		</div><div id='ansSection".($x + 1)."'>";
 			
 		$anspages=0;
@@ -773,6 +822,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 		$uid = $row ["uid"];
 		$_SESSION["username"]=$row["username"];
 		$_SESSION["uid"]=$row["uid"];
+		$_SESSION["role"]=$row["role"];
 		echo "<script type='text/javascript'>uname=" . $uid . ";showLogout();</script>";
 		showTopPosts($uid);
 		echo "<script type='text/javascript'>document.getElementById('profileHref').href='./profile.php?uid=". $uid . "';</script>";
@@ -808,7 +858,7 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 						if ($uid != 0) {
 							$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 							OR die ('Could not connect to MySQL: '.mysql_error());
-							$sql = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc";
+							$sql = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc";
 							$rs = mysqli_query ($conn,$sql );
 							$x = 0;
 							while ( $row = mysqli_fetch_assoc ( $rs ) ) {
@@ -1002,6 +1052,36 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 						<input id="tags">
 					</div>
 					<button class="btn btn-default" onclick="createPost()">Submit</button>
+				</div>
+				<div class="modal-footer"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="myEditModal" role="dialog">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Post Details</h4>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="postEditTitle">Title:</label> <input type="text"
+							class="form-control" name="postEditTitle" id="postEditTitle">
+					</div>
+					<div class="form-group">
+						<label for="postEditContent">Content:</label>
+						<textarea class="form-control" rows="5" id="postEditContent"
+							name="postEditContent"></textarea>
+					</div>
+					<div class="form-group">
+						<label for="postEditContent">Tags:</label>
+						<input id="tags">
+					</div>
+					<input type="hidden" id="updateQid" value="" />
+<input type="hidden" id="xValue" value=""/>
+					<button class="btn btn-default" onclick="updatePost()">Submit</button>
 				</div>
 				<div class="modal-footer"></div>
 			</div>
