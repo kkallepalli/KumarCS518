@@ -7,14 +7,14 @@ $totalPages=$_POST["totalPages"];
 $conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 OR die ('Could not connect to MySQL: '.mysql_error());
 
-$sqlcount="SELECT count(*) as count from question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid;
+$sqlcount="SELECT count(*) as count from question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid!=".$uid;
 $rs2 = mysqli_query($conn,$sqlcount);
 while ( $row = mysqli_fetch_assoc ( $rs2 ) ) {
 	$totalPages=ceil($row["count"]/5);
 }
 
 echo "<script type='text/javascript'>showTopQuesPagination(".$pgno.",".$totalPages.",".$uid.");</script>";
-	$sql1 = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
+	$sql1 = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid!=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
 	if(!$conn)
 	{
 		echo "error";
@@ -40,8 +40,13 @@ echo "<script type='text/javascript'>showTopQuesPagination(".$pgno.",".$totalPag
 			{
 				if($_SESSION["role"]==1)
 				{
-					$postinfo	=	$postinfo."<button id='deleteBtn' type='button' class='btn btn-default btn-sm' onclick='deleteQuestion(".$row["qid"].")'><img src='images/close-circle.png'></button><button id='editBtn' type='button' class='btn btn-default btn-sm' onclick='editQuestion(".$row["qid"].",".($x + 1).")'><img src='images/edit-button.png'></button><button id='freezeBtn' type='button' class='btn btn-default btn-sm' onclick='freezeQuestion(".$row["qid"].")'><img src='images/freeze-image.png'></button>";
-			}
+					$freezeValue=0;
+					if($row["freeze"]==0)
+					{
+						$freezeValue=1;
+					}
+					$postinfo	=	$postinfo."<button id='deleteBtn' type='button' class='btn btn-default btn-sm' onclick='deleteQuestion(".$row["qid"].")'><img src='images/close-circle.png'></button><button id='editBtn' type='button' class='btn btn-default btn-sm' onclick='editQuestion(".$row["qid"].",".($x + 1).")'><img src='images/edit-button.png'></button><button id='freezeBtn' type='button' class='btn btn-default btn-sm' onclick='freezeQuestion(".$row["qid"].",".$freezeValue.")'><img src='images/freeze-image.png'></button>";
+				}
 			}
 		$postinfo =	$postinfo."</div>
 		<div class='col-sm-2'>
@@ -49,7 +54,7 @@ echo "<script type='text/javascript'>showTopQuesPagination(".$pgno.",".$totalPag
 		Down: <span id='qVoteDown".$row["qid"]."' class='badge'>".$row["votesdown"]."</span>
 		Answers <a href='#'><span id='qanswers".$row["qid"]."' class='badge'>" .$row["answers"]."</span></a>
 		</div>
-  		<div class='col-sm-3'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><!--<p style='word-wrap: break-word;'>Posted by:<br>--><p style='padding: 5px;'>".$row ["username"]." [".$row ["score"]."]</p><p style='font-size: 12px;color: #0096e1;font-weight: bold;'>".$row ["created_date"]."</p></div>
+  		<div class='col-sm-3'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><!--<p style='word-wrap: break-word;'>Posted by:<br>--><p style='padding: 5px;'>".$row ["username"]." [Score:".$row ["score"].",Total Ques:".$row["totalquestions"]."]</p><p style='font-size: 12px;color: #0096e1;font-weight: bold;'>".$row ["created_date"]."</p></div>
   		</div><div id='ansSection".($x + 1)."'>";
 			
 		$anspages=0;
