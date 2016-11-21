@@ -747,19 +747,19 @@ function peopleSearch()
 			<ul class="nav navbar-nav">
 				<li class="active"><a href="#" style="background-color: #3a4b53;margin-right: 2px;margin-left: 2px;">Top
 						Questions</a></li>
-				<li class="active" id='postLink' style="display: none; cursor: hand;"><a style="background-color: #3a4b53;margin-right: 2px;margin-left: 2px;"
+				<li class="active" id='postLink' style="display: none; cursor: pointer;"><a style="background-color: #3a4b53;margin-right: 2px;margin-left: 2px;"
 					data-toggle='modal' data-target='#myPostModal'>Post</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
 				<!-- satya code for user search -->
 				<li style="margin-top: 7px;"><input class="form-control" style="display: none; background-color:#dde2d9 ; color: black; position:relative" type="text" placeholder = "Search People" id="search-people" onkeyup="peopleSearch()"></input></li>
 				<div id="searchResults" class="searchResults"></div>
-				<li id="registerLink"><a data-toggle='modal' data-target='#regModal' style='cursor: hand;'>Register</a></li>
+				<li id="registerLink"><a data-toggle='modal' data-target='#regModal' style='cursor: pointer;'>Register</a></li>
 				<li id='profileLink'
-					style="display: none; cursor: hand; color: white;"><a id="profileHref" href=""> Welcome,<?php echo $_SESSION["username"]; ?> </a></li>
-				<li id="helpLink"><a style='cursor: hand;'>Help</a></li>
+					style="display: none; cursor: pointer; color: white;"><a id="profileHref" href=""> Welcome,<?php echo $_SESSION["username"]; ?> </a></li>
+				<li id='helpLink'><a href="Help.php">Help</a></li>
 				<li id='loginLink'><a data-toggle='modal' data-target='#myModal'
-					style='cursor: hand;'>Login</a></li>
+					style='cursor: pointer;'>Login</a></li>
 				<li id='logoutLink' style="display: none;"><a href="logout.php">Logout</a></li>
 			</ul>
 		</div>
