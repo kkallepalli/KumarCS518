@@ -628,13 +628,8 @@ function peopleSearch()
 				<div id="searchResults" class="searchResults"></div>
 				<li id="registerLink"><a data-toggle='modal' data-target='#regModal' style='cursor: pointer;'>Register</a></li>
 				<li id='profileLink'
-<<<<<<< HEAD
 					style="display: none; cursor: pointer; color: white;"><a id="profileHref" href=""> Welcome,<?php echo $_SESSION["username"]; ?> </a></li>
 				<li id='helpLink'><a href="Help.php">Help</a></li>
-=======
-					style="display: none; cursor: hand; color: white;"><a id="profileHref" href=""> Welcome,<?php echo $_SESSION["username"]; ?> </a></li>
-				<li id="helpLink"><a style='cursor: hand;'>Help</a></li>
->>>>>>> 635e8501ba3fc59e60dd5ee33c08e78c23aff024
 				<li id='loginLink'><a data-toggle='modal' data-target='#myModal'
 					style='cursor: pointer;'>Login</a></li>
 				<li id='logoutLink' style="display: none;"><a href="logout.php">Logout</a></li>
