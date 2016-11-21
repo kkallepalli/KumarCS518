@@ -155,7 +155,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 			<form action="#">
       	<?php
 						$conn = mysqli_connect ( DB_HOST, DB_USER, DB_PASSWORD, DB_NAME ) or die ( 'Could not connect to MySQL: ' . mysql_error () );
-						$sql = "SELECT uid, firstname, lastname, address, email, contact, username, password, upic, created_on FROM user where uid='" . $_GET["uid"] . "'";
+						$sql = "SELECT uid, firstname, lastname, address, email, contact, username, password, upic, created_on,IFNULL((select count(*) from question q where q.uid=". $_GET["uid"] ." and hide!=1),0) as totalquestions,IFNULL((select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=". $_GET["uid"] ."),0) as score FROM user where uid='" . $_GET["uid"] . "'";
 						if (! $conn) {
 							echo "error";
 						}
@@ -172,6 +172,17 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 							echo "<b>Last Name:</b>" . $row ["lastname"] . "<br>";
 							echo "<b>Address:</b>" . $row ["address"] . "<br>";
 							echo "<b>Contact:</b>" . $row ["contact"] . "<br>";
+						if(!empty($_SESSION["uid"]))
+									{
+										if(!empty($_SESSION["role"]))
+										{
+											if($_SESSION["role"]==1)
+											{
+													echo "<b>Score : </b>" . $row ["score"] . "<br>";
+													echo "<b>Total Questions : </b>" . $row ["totalquestions"] . "<br>";
+											}
+										}
+									}
 						}
 			?>
       </form>
