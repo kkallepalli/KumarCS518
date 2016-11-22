@@ -25,8 +25,8 @@ $bestMark=0;
 $sql="SELECT count(*) as count from answers A WHERE A.qid=".$questionId." and best_ans=1";
 $rs = mysqli_query($conn,$sql);
 while ( $countrow = mysqli_fetch_assoc ( $rs ) ) {
-	$anspages=$countrow["count"];
-	if($anspages>=1)
+	$bestpages=$countrow["count"];
+	if($bestpages>=1)
 	{
 		$bestMark=1;
 	}
