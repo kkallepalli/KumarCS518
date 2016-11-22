@@ -69,7 +69,7 @@ div.searchResults {
     color: #0096e1;
     font-weight: bold;
     background: white;
-    /* padding: 10px; */
+    margin-left:63.5%;
     border: 1px solid #ccc;
     border-top-color: #d9d9d9;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
@@ -723,7 +723,7 @@ function peopleSearch()
 						var persons = responseData.split("-");
 						  var searchDiv = $("#searchResults");
 						  var usersStr="";
-						  for(var i=0; i<persons.length; i++){
+						  for(var i=0; i<persons.length-1; i++){
 							  usersStr+="<li><a href='./profile.php?uid="+persons[i].split("|")[1]+"'>"+persons[i].split("|")[0]+"</a></li>";  
 			          		}
 			          	
@@ -758,8 +758,7 @@ function peopleSearch()
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
 				<!-- satya code for user search -->
-				<li style="margin-top: 7px;"><input class="form-control" style="display: none; background-color:#dde2d9 ; color: black; position:relative" type="text" placeholder = "Search People" id="search-people" onkeyup="peopleSearch()"></input></li>
-				<div id="searchResults" class="searchResults"></div>
+				<li style="margin-top: 7px;"><input class="form-control" style="display: none; background-color:#dde2d9 ; color: black; position:relative" type="text" placeholder = "Search People" id="search-people" onkeyup="peopleSearch()" /></li>
 				<li id="registerLink"><a data-toggle='modal' data-target='#regModal' style='cursor: pointer;'>Register</a></li>
 				<li id='profileLink'
 					style="display: none; cursor: pointer; color: white;"><a id="profileHref" href=""> Welcome,<?php echo $_SESSION["username"]; ?> </a></li>
@@ -768,6 +767,7 @@ function peopleSearch()
 					style='cursor: pointer;'>Login</a></li>
 				<li id='logoutLink' style="display: none;"><a href="logout.php">Logout</a></li>
 			</ul>
+			<div id="searchResults" class="searchResults"></div>
 		</div>
 	</nav>
 
@@ -804,7 +804,7 @@ function peopleSearch()
 		<div class='row post'>
 		<div class='col-sm-7'>
 			<p class='title' style='cursor: hand;' data-toggle='modal' data-target='#myModal' >" . $row ["qtitle"] . "</p>
-			<p>".$row["qcontent"]."</p>
+			<div>".$row["qcontent"]."</div>
 		</div>
 		<div class='col-sm-2'>
 		Up: <span  class='badge'>".$row["votesup"]."</span>
@@ -1289,7 +1289,7 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 					</div>
 					<div class="form-group">
 						<label for="postEditContent">Tags:</label>
-						<input id="tags">
+						<input id="tags1">
 					</div>
 					<input type="hidden" id="updateQid" value="" />
 					<input type="hidden" id="xValue" value=""/>

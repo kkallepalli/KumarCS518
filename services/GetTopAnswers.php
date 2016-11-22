@@ -6,6 +6,14 @@ OR die ('Could not connect to MySQL: '.mysql_error());
 $questionId=$_POST["qid"];
 $pgno=$_POST["pgno"];
 $secid=$_POST["secid"];
+
+$qfreeze=0;
+$sqlfreeze="SELECT freeze from question WHERE qid=".$questionId;
+$rsfreeze = mysqli_query($conn,$sqlfreeze);
+while ( $frow = mysqli_fetch_assoc ( $rsfreeze ) ) {
+	$qfreeze=$frow["freeze"];
+}
+
 $anspages=0;
 $sqlanscount="SELECT count(*) as count from answers A WHERE A.qid=".$questionId;
 $rsans = mysqli_query($conn,$sqlanscount);
@@ -53,7 +61,10 @@ while ( $ansrow = mysqli_fetch_assoc ( $rs2 ) ) {
 		$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><b>".$ansrow["username"]."[".$ansrow["score"]."<span class='adminonly'>,".$ansrow["totalquestions"]."</span>]</b></div><div class='col-sm-1'><span id='qAnsUp".$ansrow["aid"]."'>".$ansrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$ansrow["aid"].",".$questionId.")' style='cursor:hand;'></div><div class='col-sm-1'><span id='qAnsDown".$bestrow["aid"]."'>".$ansrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$ansrow["aid"].",".$questionId.")' style='cursor:hand;'></div></div>";
 	}
 }
+if($qfreeze==0)
+{
 $postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='comment".$secid."' onclick='event.stopPropagation()'></textarea><input type='button' value='Submit' onclick='saveAnswer(1,".($x+1).",".$questionId.")'></div>";
+}
 $postinfo = $postinfo . "</div></div></div>";
 echo $postinfo;
 echo "<script type='text/javascript'>showTopAnsPagination(".$secid.",".$pgno.",".$anspages.",".$questionId.");</script>";

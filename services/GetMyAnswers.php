@@ -7,6 +7,13 @@ $questionId=$_POST["qid"];
 $pgno=$_POST["pgno"];
 $secid=$_POST["secid"];
 
+$qfreeze=0;
+$sqlfreeze="SELECT freeze from question WHERE qid=".$questionId;
+$rsfreeze = mysqli_query($conn,$sqlfreeze);
+while ( $frow = mysqli_fetch_assoc ( $rsfreeze ) ) {
+	$qfreeze=$frow["freeze"];
+}
+
 $anspages=0;
 $sqlanscount="SELECT count(*) as count from answers A WHERE A.qid=".$questionId;
 $rsans = mysqli_query($conn,$sqlanscount);
@@ -73,7 +80,7 @@ while ( $ansrow = mysqli_fetch_assoc ( $rs2 ) ) {
 		}
 	}
 }
-if($row["freeze"]==0)
+if($qfreeze==0)
 {
 	$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='mycomment".($x + 1)."' onclick='event.stopPropagation()'></textarea><input type='button' value='Submit' onclick='saveAnswer(2,".($x+1).",".$questionId.")'></div>";
 }
