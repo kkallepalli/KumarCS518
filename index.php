@@ -139,13 +139,13 @@ function setUploadName(fieldname,fname){
 
 function createPost()
 {
-	if($("#postTitle").val()=='' || $("#postTitle").val()==null || $("#postContent").val()=="" || $("#postContent").val()==null )
+	if($("#postTitle").val()=='' || $("#postTitle").val()==null || tinymce.get('postContent').getBody().innerHTML=="" || tinymce.get('postContent').getBody().innerHTML==null )
 	{
 		alert("Post Title & content cannot be empty : "+$("#tags").val());
 		}
 	else
 	{
-			var postData = "uname="+ uname+"&title="+$("#postTitle").val()+"&content="+$("#postContent").val()+"&tags="+$("#tags").val();
+			var postData = "uname="+ uname+"&title="+$("#postTitle").val()+"&content="+tinymce.get('postContent').getBody().innerHTML+"&tags="+$("#tags").val();
 		    $.ajax({
 		          type: "post",
 		          url: "services/CreatePost.php",
@@ -154,7 +154,8 @@ function createPost()
 		          success: function(responseData, textStatus, jqXHR) {
 		              if(responseData=="error")
 		              {
-		            	  alert("uname:"+uname+"title"+$("#postTitle").val());
+		            	 // alert("uname:"+uname+"title"+$("#postTitle").val());
+		            	  location.reload(); 
 		                 }
 		              else
 		              {
