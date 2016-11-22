@@ -88,7 +88,10 @@ div.searchResults {
     
 }
 </style>
- <script>tinymce.init({ selector:'textarea',plugins : 'image' });</script>
+ <script>tinymce.init({ selector:'textarea',plugins : 'image',  file_browser_callback: function(field_name, url, type, win) {
+	$("#mceUpload").val(field_name);
+     if(type=='image') $('#my_form input').click();
+ } });</script>
 <script type="text/javascript">
 var uname="";
  var recQid='<?php echo $_SESSION["recQid"]; ?>';
@@ -130,6 +133,9 @@ function regUser()
 	}
 }
 
+function setUploadName(fieldname,fname){
+	$("#"+fieldname).val(fname);
+}
 
 function createPost()
 {
@@ -1293,6 +1299,13 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 			</div>
 		</div>
 	</div>
+	
+	<iframe id="form_target" name="form_target" style="display:none"></iframe>
+
+	<form id="my_form" action="./upload.php" target="form_target" method="post" enctype="multipart/form-data" style="width:0px;height:0;overflow:hidden">
+	<input name="image" type="file" onchange="$('#my_form').submit();this.value='';">
+	<input type="hidden" id="mceUpload" name="mceUpload" value="" />
+	</form>
 
 
 	<div class="container footer-line">
