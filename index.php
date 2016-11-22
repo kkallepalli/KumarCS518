@@ -222,6 +222,7 @@ function showMyQuestions()
 	if(uname=="")
 	{
 		$('#myQuesSection').css('opacity', '0');
+		$('#myQuesPages').css('opacity', '0');
 		$('#recommendationPanel').hide();
 	}
 	else{
