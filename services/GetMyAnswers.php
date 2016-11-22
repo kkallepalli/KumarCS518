@@ -40,7 +40,7 @@ $postinfo = $postinfo ."</div>
 						  		</div><div id='myansSection".($x + 1)."'>
 								<div id='mycollapse" . ($x + 1) . "' class='post-footer collapse'><div class='list-group'><div class='list-group-item row' style='margin:0px;'><ul id='myAnsPages".($x + 1)."' class='pagination' style='display: inline;'></ul></div>";
 
-$sql2="SELECT A.aid,A.adesc,U.upic,U.username,A.best_ans,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$questionId." order by value desc limit ".(($pgno-1)*5).",5";
+$sql2="SELECT A.aid,A.adesc,U.upic,U.username,A.best_ans,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$questionId." order by A.best_ans desc,value desc limit ".(($pgno-1)*5).",5";
 $rs2 = mysqli_query($conn,$sql2);
 $bestansid=0;
 $bestrow="";
