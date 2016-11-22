@@ -21,6 +21,17 @@ while ( $countrow = mysqli_fetch_assoc ( $rsans ) ) {
 	$anspages=ceil($countrow["count"]/5);
 }
 
+$bestMark=0;
+$sql="SELECT count(*) as count from answers A WHERE A.qid=".$questionId." and best_ans=1";
+$rs = mysqli_query($conn,$sql);
+while ( $countrow = mysqli_fetch_assoc ( $rs ) ) {
+	$anspages=$countrow["count"];
+	if($anspages>=1)
+	{
+		$bestMark=1;
+	}
+}
+
 $postinfo = $postinfo ."</div>
 								<div class='col-sm-2'>
 								Votes <a href='#'><span class='badge'>".$row["value"]."</span></a>
@@ -70,7 +81,7 @@ while ( $ansrow = mysqli_fetch_assoc ( $rs2 ) ) {
 		}
 		else
 		{
-			if($row["freeze"]==0)
+			if($row["freeze"]==0 && $bestMark==0)
 			{
 				$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".$ansrow["adesc"]."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive' ><b>".$ansrow["username"]."[".$ansrow["score"]."<span class='adminonly'>,".$ansrow["totalquestions"]."</span>]</b></div><a href='#'class='col-sm-1'>".$ansrow["upvotes"]."<img width='24px' height='24px' src='./images/thumb-up-outline.png' ></a><a href='#' class='col-sm-1'>".$ansrow["downvotes"]."<img width='24px' height='24px' src='./images/thumb-down-outline.png' ></a><div class='col-sm-2'><button onclick='submitBestAns(".$ansrow["aid"].")'>Mark</button></div></div>";
 			}
