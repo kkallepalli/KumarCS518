@@ -32,13 +32,7 @@ while ( $countrow = mysqli_fetch_assoc ( $rs ) ) {
 	}
 }
 
-$postinfo = $postinfo ."</div>
-								<div class='col-sm-2'>
-								Votes <a href='#'><span class='badge'>".$row["value"]."</span></a>
-								Answers <a href='#'><span class='badge'>" .$row["answers"]."</span></a></div>
-						  		<div class='col-sm-3'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><br>".$row ["username"]."[".$row["score"]."]</div>
-						  		</div><div id='myansSection".($x + 1)."'>
-								<div id='mycollapse" . ($x + 1) . "' class='post-footer collapse'><div class='list-group'><div class='list-group-item row' style='margin:0px;'><ul id='myAnsPages".($x + 1)."' class='pagination' style='display: inline;'></ul></div>";
+$postinfo = $postinfo ."<div id='mycollapse" . ($x + 1) . "' class='post-footer collapse'><div class='list-group'><div class='list-group-item row' style='margin:0px;'><ul id='myAnsPages".($x + 1)."' class='pagination' style='display: inline;'></ul></div>";
 
 $sql2="SELECT A.aid,A.adesc,U.upic,U.username,A.best_ans,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$questionId." order by A.best_ans desc,value desc limit ".(($pgno-1)*5).",5";
 $rs2 = mysqli_query($conn,$sql2);
@@ -102,7 +96,7 @@ if($qfreeze==0)
 {
 	$postinfo = $postinfo . "<div class='list-group-item'><label for='Answer'>Comment:</label><textarea class='form-control' rows='5' id='mycomment".($x + 1)."' onclick='event.stopPropagation()'></textarea><input type='button' value='Submit' onclick='saveAnswer(2,".($x+1).",".$questionId.")'></div>";
 }
-$postinfo = $postinfo . "</div></div></div>";
+$postinfo = $postinfo . "</div>";
 echo $postinfo;
 echo "<script type='text/javascript'>showMyAnsPagination(".$secid.",".$pgno.",".$anspages.",".$questionId.");</script>";
 ?>

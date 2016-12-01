@@ -1052,7 +1052,7 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 							echo "<script type='text/javascript'>showMyQuesPagination(".$pgno.",".$totalPages.",".$uid.");</script>";
 							
 							$sql = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
-							$rs = mysqli_query ($conn,$sql );
+							$rs = mysqli_query ($conn,$sql );					
 							$x = 0;
 							while ( $row = mysqli_fetch_assoc ( $rs ) ) {
 								$picurl="profiles/profile.png";
@@ -1092,8 +1092,8 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 								
 								$bestMark=0;
 								$sql="SELECT count(*) as count from answers A WHERE A.qid=".$questionId." and best_ans=1";
-								$rs = mysqli_query($conn,$sql);
-								while ( $countrow = mysqli_fetch_assoc ( $rs ) ) {
+								$bestrs = mysqli_query($conn,$sql);
+								while ( $countrow = mysqli_fetch_assoc ( $bestrs ) ) {
 									$anspages=$countrow["count"];
 									if($anspages>=1)
 									{
