@@ -415,7 +415,7 @@ function openTopQuesPage(pgno,uid,lastpage)
 	topQuesPage=pgno;
 	lastQuesPage=lastpage;
 	userId=uid;
-	var postData ="uid="+ uid+"&pgno="+pgno+"&totalPages="+lastpage;
+	var postData ="uid="+ uid+"&pgno="+pgno+"&totalPages="+lastpage+"&tagid="+$("#topQuesTag").val();
 	$.ajax({
           type: "post",
           url: "services/GetTopQuestions.php",
@@ -594,6 +594,20 @@ function openMyAnsPage(secid,pgno,qid,lastpage)
       });
 	}
 
+function clearTagQuestions()
+{
+	$("#clearTag").html("");
+	$("#topQuesTag").val("");
+	location.reload();
+}
+
+function showTagQuestions(uid,tagid,tagname)
+{
+	$("#clearTag").html(tagname+"<span onclick=\"clearTagQuestions()\"  class=\"badge\">x</span>");
+	$("#topQuesTag").val(tagid);
+	openTopQuesPage(1,uid,lastQuesPage);
+}
+
 function deleteQuestion(qid)
 {
 	var postData ="qid="+qid;
@@ -689,10 +703,23 @@ var postData ="qid="+ qid+"&freeze="+freeze;
       });
 }
 
+function addTag()
+{
+	if($( "#tags" ).val()=="")
+	{
+		$( "#tags" ).val($( "#myTags" ).val());
+	}
+	else
+	{
+		$( "#tags" ).val($( "#tags" ).val()+","+$( "#myTags" ).val());
+		}
+	$( "#myTags" ).val("");
+}
+
 $(function() {
 var availableTags = ["Indian","Chinese","French","Greek","Italian","Thai","Mediterrian","American","Continental","Cuban","Mexican","Malaysian","Singapore","Spanish"];
 
-$( "#tags" ).autocomplete({
+$( "#myTags" ).autocomplete({
     source: availableTags
   });
 $( "#ui-id-1").attr("style","z-index:1050");
@@ -825,6 +852,7 @@ function peopleSearch()
 		style="margin-left: 0px; margin-right: 0px; min-height: 80vh;">
 		<div class="col-sm-6 w3-card-2" id="topQuestionsSection">
 		<div class="row" style="padding: 5px; margin:0px;background-color: #1b427;display:none;" id="topbar">
+				<button id="clearTag" type="button" class="btn btn-info"><span onclick="clearTagQuestions()" class="badge">x</span></button>
 				<input type="text" id="search-criteria" onkeydown="" />
 				<button id="search" type="button" class="btn btn-default btn-sm" onclick="searchPosts()">
          		<img src="images/magnify.png" alt="magnify">
@@ -840,6 +868,7 @@ function peopleSearch()
 					  <li><a href="#">5</a></li>
 				</ul>
 				<input type="hidden" id="topQuesPageNo" value="" />
+				<input type="hidden" id="topQuesTag" value="" />
         	<!-- <button id="sortTimeAesc" type="button" class="btn btn-default btn-sm" onclick="sortTopQuestions(1)">
          		<img src="images/sort-ascending.png" alt="ascending">
         		</button>
@@ -851,6 +880,23 @@ function peopleSearch()
 		 </div>
 		 <div id="topQuestionHolder">
 <?php
+echo $_POST["topQuesTag"];
+
+function bbcode($bbcontent)
+{
+	if(strpos($bbcontent,'[b]') && strpos($bbcontent,'[/b]'))
+	{
+		$bbcontent=str_replace("[b]","<b>",$bbcontent);
+		$bbcontent=str_replace("[/b]","</b>",$bbcontent);
+	}
+	if(strpos($bbcontent,'[i]') && strpos($bbcontent,'[/i]'))
+	{
+		$bbcontent=str_replace("[i]","<em>",$bbcontent);
+		$bbcontent=str_replace("[/i]","</em>",$bbcontent);
+	}
+	return $bbcontent;
+}
+
 function showTopPosts($uid) {
 	$pgno=$_SESSION["pgno"];
 	$totalPages=0;
@@ -868,7 +914,7 @@ function showTopPosts($uid) {
 	}
 	
 	echo "<script type='text/javascript'>showTopQuesPagination(".$pgno.",".$totalPages.",".$uid.");</script>";
-	$sql1 = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid!=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
+	$sql1 = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value FROM question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid!=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
 	if(!$conn)
 	{
 		echo "error";
@@ -884,12 +930,14 @@ function showTopPosts($uid) {
 		$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;' >
 		<div class='row post top-posts'>
 		<div class='col-sm-7'>
-			<p id='myTitle".($x + 1)."' class='title' style='cursor: hand;' data-toggle='collapse' data-target=#collapse" . ($x + 1) . ">" . $row ["qtitle"] . "</p> 
-			<div id='myDesc".($x + 1)."'>".$row["qcontent"]."</div>";
-					if($row["tags"]!=null)
-								{
-									$postinfo = $postinfo ."<a href='#' style='background-color: #5bc0de;color:#ffffff;padding: 5px;'>".$row["tags"]."</a>";
-								}
+			<p id='myTitle".($x + 1)."' class='title' style='cursor: hand;' data-toggle='collapse' data-target=#collapse" . ($x + 1) . ">" . $row ["qtitle"] . "</p>
+				<div id='myDesc".($x + 1)."'>".bbcode($row["qcontent"])."</div>";
+					
+				$sqltags="select * from tags where tag_id in (SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=".$row["qid"].")";
+				$rstags = mysqli_query($conn,$sqltags);
+					while ( $rsrow = mysqli_fetch_assoc ( $rstags ) ) {
+						$postinfo = $postinfo ."<a href='javascript:showTagQuestions(".$uid.",".$rsrow["tag_id"].",\"".$rsrow["tags"]."\")' style='background-color: #5bc0de;color:#ffffff;padding: 5px;margin-right:5px;'>".$rsrow["tags"]."</a>";
+					}
 								
 		if(!empty($_SESSION["role"]))
 		{
@@ -1051,7 +1099,7 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 							
 							echo "<script type='text/javascript'>showMyQuesPagination(".$pgno.",".$totalPages.",".$uid.");</script>";
 							
-							$sql = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
+							$sql = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value FROM question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
 							$rs = mysqli_query ($conn,$sql );					
 							$x = 0;
 							while ( $row = mysqli_fetch_assoc ( $rs ) ) {
@@ -1063,11 +1111,12 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 								$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;'><div class='row post'>
 								<div class='col-sm-7'>
 									<p id='urTitle".($x + 1)."' class='title' style='cursor: hand;' data-toggle='collapse' data-target='#mycollapse" . ($x + 1) . "'>" . $row ["qtitle"] . "</p>
-									<div id='urDesc".($x + 1)."'>".$row["qcontent"]."</div>";
+									<div id='urDesc".($x + 1)."'>".bbcode($row["qcontent"])."</div>";
 						
-								if($row["tags"]!=null)
-								{
-									$postinfo = $postinfo ."<a href='#' style='background-color: #5bc0de;color:#ffffff;padding: 5px;'>".$row["tags"]."</a>";
+							$sqltags="select * from tags where tag_id in (SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=".$row["qid"].")";
+							$rstags = mysqli_query($conn,$sqltags);
+							while ( $rsrow = mysqli_fetch_assoc ( $rstags ) ) {
+									$postinfo = $postinfo ."<a href='javascript:showTagQuestions(".$uid.",".$rsrow["tag_id"].",\"".$rsrow["tags"]."\")' style='background-color: #5bc0de;color:#ffffff;padding: 5px;margin-right:5px;'>".$rsrow["tags"]."</a>";
 								}
 								
 								if(!empty($_SESSION["role"]))
@@ -1280,7 +1329,8 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 					</div>
 					<div class="form-group">
 						<label for="postContent">Tags:</label>
-						<input id="tags">
+						<input id="tags" disabled="disabled">
+						<input id="myTags"><button type="button" onclick="addTag()">Add</button>
 					</div>
 					<button class="btn btn-default" onclick="createPost()">Submit</button>
 				</div>

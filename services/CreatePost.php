@@ -14,14 +14,18 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	if(mysqli_query($conn,$sql))
 	{
 		$qid=mysqli_insert_id($conn);
-		$sql_tag="INSERT INTO question_tag values(".$qid.",(select tag_id from tags where tags='".$tags."'))";
-		if(mysqli_query($conn,$sql_tag))
+		$tagslist=explode(",",$tags);
+		foreach($tagslist as $t)
 		{
-			echo $qid;
-		}
-		else
-		{
-			echo "error";
+			$sql_tag="INSERT INTO question_tag values(".$qid.",(select tag_id from tags where tags='".$t."'))";
+			if(mysqli_query($conn,$sql_tag))
+			{
+				echo $qid;
+			}
+			else
+			{
+				echo "error";
+			}
 		}
 		
 	}

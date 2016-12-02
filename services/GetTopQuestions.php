@@ -4,17 +4,30 @@ include("../connectDB.php");
 $uid=$_POST["uid"];
 $pgno=$_POST["pgno"];
 $totalPages=$_POST["totalPages"];
+$tagid=$_POST["tagid"];
 $conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 OR die ('Could not connect to MySQL: '.mysql_error());
 
-$sqlcount="SELECT count(*) as count from question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid!=".$uid;
+if(!empty($tagid))
+{
+	$sqlcount="SELECT count(*) as count from question Q,user U,question_tag t WHERE U.uid=Q.uid and Q.hide!=1 and U.uid!=".$uid." and t.qid_fk=Q.qid and t.tag_id_fk=".$tagid;
+}
+else {
+	$sqlcount="SELECT count(*) as count from question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid!=".$uid;
+}
 $rs2 = mysqli_query($conn,$sqlcount);
 while ( $row = mysqli_fetch_assoc ( $rs2 ) ) {
 	$totalPages=ceil($row["count"]/5);
 }
 
 echo "<script type='text/javascript'>showTopQuesPagination(".$pgno.",".$totalPages.",".$uid.");</script>";
-	$sql1 = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,IFNULL((select count(*) from question q where q.uid=U.uid and hide!=1),0) as totalquestions,IFNULL((select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid),0) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid!=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
+	if(!empty($tagid))
+	{
+		$sql1 = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,IFNULL((select count(*) from question q where q.uid=U.uid and hide!=1),0) as totalquestions,IFNULL((select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid),0) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value FROM question Q,user U,question_tag t WHERE U.uid=Q.uid and Q.hide!=1 and U.uid!=".$uid." and t.qid_fk=Q.qid and t.tag_id_fk=".$tagid." order by value desc LIMIT ".(($pgno-1)*5).",5";
+	}
+	else {
+	$sql1 = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,IFNULL((select count(*) from question q where q.uid=U.uid and hide!=1),0) as totalquestions,IFNULL((select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid),0) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value FROM question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid!=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
+	}
 	if(!$conn)
 	{
 		echo "error";
@@ -32,10 +45,11 @@ echo "<script type='text/javascript'>showTopQuesPagination(".$pgno.",".$totalPag
 		<div class='col-sm-7'>
 			<p id='myTitle".($x + 1)."' class='title' style='cursor: hand;' data-toggle='collapse' data-target=#collapse" . ($x + 1) . ">" . $row ["qtitle"] . "</p> 
 			<div id='myDesc".($x + 1)."'>".$row["qcontent"]."</div>";
-			if($row["tags"]!=null)
-			{
-				$postinfo = $postinfo ."<a href='#' style='background-color: #5bc0de;color:#ffffff;padding: 5px;'>".$row["tags"]."</a>";
-			}
+			$sqltags="select * from tags where tag_id in (SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=".$row["qid"].")";
+				$rstags = mysqli_query($conn,$sqltags);
+					while ( $rsrow = mysqli_fetch_assoc ( $rstags ) ) {
+						$postinfo = $postinfo ."<a href='javascript:showTagQuestions(".$uid.",".$rsrow["tag_id"].",\"".$rsrow["tags"]."\")' style='background-color: #5bc0de;color:#ffffff;padding: 5px;margin-right:5px;'>".$rsrow["tags"]."</a>";
+					}
 			if(!empty($_SESSION["role"]))
 			{
 				if($_SESSION["role"]==1)
