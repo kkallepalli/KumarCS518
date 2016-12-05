@@ -21,6 +21,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 <script src="js/jquery.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+<script src='https://www.google.com/recaptcha/api.js'></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="js/bootstrap.min.js"></script>
 <style type="text/css">
@@ -703,6 +704,17 @@ var postData ="qid="+ qid+"&freeze="+freeze;
       });
 }
 
+function verifyGCaptcha()
+{
+	var resp=$("#gcOutput").text();
+	console.log(resp);
+	 if(resp.indexOf("success\": true")<0)
+	 {
+		alert("Captcha Not verified");
+		window.location="./logout.php";
+		 }
+	}
+
 function addTag()
 {
 	if($( "#tags" ).val()=="")
@@ -1023,6 +1035,38 @@ function showTopPosts($uid) {
 }
 // user login code
 if ($_SERVER ['REQUEST_METHOD'] == "POST") {
+	
+	echo "<span id='gcOutput' style='display:none'>";
+	$url = 'https://www.google.com/recaptcha/api/siteverify';
+$fields = array(
+	'secret' => urlencode("6LfB0g0UAAAAAKU5Anvre3uYnFth40Yn8QRVCW57"),
+	'response' => urlencode($_POST['g-recaptcha-response']),
+	'remoteip' => urlencode($_SERVER['REMOTE_ADDR'])
+);
+
+//url-ify the data for the POST
+foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+rtrim($fields_string, '&');
+
+//open connection
+$ch = curl_init();
+
+//set the url, number of POST vars, POST data
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch,CURLOPT_URL, $url);
+curl_setopt($ch,CURLOPT_POST, count($fields));
+curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
+
+//execute post
+
+$result = curl_exec($ch);
+echo "</span>";
+
+echo "<script>verifyGCaptcha();</script>";
+//close connection
+curl_close($ch);
+
+	
 	$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 	OR die ('Could not connect to MySQL: '.mysql_error());
 	$uname = "";
@@ -1300,6 +1344,7 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 							<div class="checkbox">
 								<label><input type="checkbox"> Remember me</label>
 							</div>
+							<div class="g-recaptcha" data-sitekey="6LfB0g0UAAAAAF_C8Kipa4HHwJy5UxrHi80ObYkW"></div>
 							<button type="submit" class="btn btn-default">Submit</button>
 						</form>
 					</div>
