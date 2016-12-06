@@ -2,8 +2,12 @@
 session_start ();
 include("connectDB.php");
 if ($_SERVER ['REQUEST_METHOD'] == "POST") {
-	$_SESSION["username"]=$_POST["email"];
+	if(empty($_SESSION["userprofile"]))
+	{
+		$_SESSION["username"]=$_POST["email"];
+	}
 }
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -423,7 +427,7 @@ function openTopQuesPage(pgno,uid,lastpage)
           data: postData,
           contentType: "application/x-www-form-urlencoded",
           success: function(responseData, textStatus, jqXHR) {
-			console.log(responseData);
+			//console.log(responseData);
 			$("#topQuestionHolder").empty();
 			$("#topQuestionHolder").append(responseData);
 
@@ -672,7 +676,7 @@ var postData ="qid="+ $("#updateQid").val()+"&qContent="+tinymce.get('postEditCo
           data: postData,
           contentType: "application/x-www-form-urlencoded",
           success: function(responseData, textStatus, jqXHR) {
-			console.log(responseData);
+			//console.log(responseData);
 			$("#myEditModal").modal("hide");	
 // 			$("#myTitle"+$("#xValue").val()).text($("#postEditTitle").val());
 // 			$("#myDesc"+$("#xValue").val()).text(tinymce.get('postEditContent').getBody().innerHTML);
@@ -707,7 +711,7 @@ var postData ="qid="+ qid+"&freeze="+freeze;
 function verifyGCaptcha()
 {
 	var resp=$("#gcOutput").text();
-	console.log(resp);
+	//console.log(resp);
 	 if(resp.indexOf("success\": true")<0)
 	 {
 		alert("Captcha Not verified");
@@ -909,6 +913,25 @@ function bbcode($bbcontent)
 	return $bbcontent;
 }
 
+function apiRequest($url, $post=FALSE, $headers=array()) {
+	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+	if($post)
+		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post));
+	$headers[] = 'Accept: application/json';
+	if(session('access_token'))
+		$headers[] = 'Authorization: Bearer ' . session('access_token');
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	$response = curl_exec($ch);
+	return json_decode($response);
+}
+function get($key, $default=NULL) {
+	return array_key_exists($key, $_GET) ? $_GET[$key] : $default;
+}
+function session($key, $default=NULL) {
+	return array_key_exists($key, $_SESSION) ? $_SESSION[$key] : $default;
+}
+
 function showTopPosts($uid) {
 	$pgno=$_SESSION["pgno"];
 	$totalPages=0;
@@ -1036,64 +1059,71 @@ function showTopPosts($uid) {
 // user login code
 if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	
-	echo "<span id='gcOutput' style='display:none'>";
-	$url = 'https://www.google.com/recaptcha/api/siteverify';
-$fields = array(
-	'secret' => urlencode("6LfB0g0UAAAAAKU5Anvre3uYnFth40Yn8QRVCW57"),
-	'response' => urlencode($_POST['g-recaptcha-response']),
-	'remoteip' => urlencode($_SERVER['REMOTE_ADDR'])
-);
-
-//url-ify the data for the POST
-foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
-rtrim($fields_string, '&');
-
-//open connection
-$ch = curl_init();
-
-//set the url, number of POST vars, POST data
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch,CURLOPT_URL, $url);
-curl_setopt($ch,CURLOPT_POST, count($fields));
-curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
-
-//execute post
-
-$result = curl_exec($ch);
-echo "</span>";
-
-echo "<script>verifyGCaptcha();</script>";
-//close connection
-curl_close($ch);
-
-	
-	$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
-	OR die ('Could not connect to MySQL: '.mysql_error());
-	$uname = "";
-	$pwd = "";
-	if (empty ( $_POST ["email"] )) {
-		$nameErr = "username is required";
-	} else {
-		$uname = escapeStr ( $conn,$_POST ["email"] );
-	}
-	$pwd = escapeStr ($conn,$_POST ["pwd"] );
-	$sql = "SELECT * FROM user WHERE username='" . $_POST ["email"] . "' and password='" . $pwd . "'";
-	$uid = 0;
-	$rs = mysqli_query ( $conn,$sql );
-	while ( $row = mysqli_fetch_assoc ( $rs ) ) {
-		$uid = $row ["uid"];
-		$_SESSION["username"]=$row["username"];
-		$_SESSION["uid"]=$row["uid"];
-		$_SESSION["role"]=$row["role"];
-		echo "<script type='text/javascript'>uname=" . $uid . ";showLogout();</script>";
-		showTopPosts($uid);
-		echo "<script type='text/javascript'>document.getElementById('profileHref').href='./profile.php?uid=". $uid . "';</script>";
+	if(empty($_SESSION["username"]))
+	{
+		echo "<span id='gcOutput' style='display:none'>";
+		$url = 'https://www.google.com/recaptcha/api/siteverify';
+		$fields = array(
+			'secret' => urlencode("6LfB0g0UAAAAAKU5Anvre3uYnFth40Yn8QRVCW57"),
+			'response' => urlencode($_POST['g-recaptcha-response']),
+			'remoteip' => urlencode($_SERVER['REMOTE_ADDR'])
+		);
+		
+		//url-ify the data for the POST
+		foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+		rtrim($fields_string, '&');
+		
+		//open connection
+		$ch = curl_init();
+		
+		//set the url, number of POST vars, POST data
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch,CURLOPT_URL, $url);
+		curl_setopt($ch,CURLOPT_POST, count($fields));
+		curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
+		
+		//execute post
+		
+		$result = curl_exec($ch);
+		echo "</span>";
+		
+		echo "<script>verifyGCaptcha();</script>";
+		//close connection
+		curl_close($ch);
 	}
 
-	mysqli_close($conn);
+
+	if(empty($_SESSION["userprofile"]))
+	{	
+		$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
+		OR die ('Could not connect to MySQL: '.mysql_error());
+		$uname = "";
+		$pwd = "";
+		if (empty ( $_POST ["email"] )) {
+			$nameErr = "username is required";
+		} else {
+			$uname = escapeStr ( $conn,$_POST ["email"] );
+		}
+		$pwd = escapeStr ($conn,$_POST ["pwd"] );
+		$sql = "SELECT * FROM user WHERE username='" . $_POST ["email"] . "' and password='" . $pwd . "'";
+		$uid = 0;
+		$rs = mysqli_query ( $conn,$sql );
+		while ( $row = mysqli_fetch_assoc ( $rs ) ) {
+			$uid = $row ["uid"];
+			$_SESSION["username"]=$row["username"];
+			$_SESSION["uid"]=$row["uid"];
+			$_SESSION["role"]=$row["role"];
+			echo "<script type='text/javascript'>uname=" . $uid . ";showLogout();</script>";
+			showTopPosts($uid);
+			echo "<script type='text/javascript'>document.getElementById('profileHref').href='./profile.php?uid=". $uid . "';</script>";
+		}
 	
-	if ($uid == 0) {
-		echo "<script type='text/javascript'>alert('Username or password doesnt match');</script>";
+		mysqli_close($conn);
+		
+		if ($uid == 0) {
+			//try github authentication
+			echo "<script type='text/javascript'>alert('Username or password doesnt match');</script>";
+		}
 	}
 }
 
@@ -1104,6 +1134,14 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 	showTopPosts($_SESSION["uid"]);
 	echo "<script type='text/javascript'>document.getElementById('profileHref').href='./profile.php?uid=". $uid . "';</script>";
 }
+else if(!empty($_SESSION["userprofile"])  && $_SERVER ['REQUEST_METHOD'] == "POST")
+{
+	$uid =$_SESSION["uid"];
+	echo "<script type='text/javascript'>uname=" . $_SESSION["uid"] . ";showLogout();</script>";
+	showTopPosts($_SESSION["uid"]);
+	echo "<script type='text/javascript'>document.getElementById('profileHref').href='./profile.php?uid=". $uid . "';</script>";
+}
+
 ?>
 </div>
 </div>
@@ -1346,6 +1384,7 @@ if(!empty($_SESSION["username"]) && $_SERVER ['REQUEST_METHOD'] != "POST")
 							</div>
 							<div class="g-recaptcha" data-sitekey="6LfB0g0UAAAAAF_C8Kipa4HHwJy5UxrHi80ObYkW"></div>
 							<button type="submit" class="btn btn-default">Submit</button>
+							<a href="https://github.com/login/oauth/authorize?client_id=37f1064c2b0a36df69dd&redirect_uri=http://qav2.cs.odu.edu/kumar/KumarCS518/login.php&scope=user:email/" class="btn btn-primary">GITHUB Login</a>
 						</form>
 					</div>
 					<div class="modal-footer"></div>
