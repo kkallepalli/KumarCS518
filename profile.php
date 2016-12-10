@@ -214,8 +214,8 @@ $(document).ready(function(){
 							echo "<b>Last Name:</b>" . $row ["lastname"] . "<br>";
 							echo "<b>Address:</b>" . $row ["address"] . "<br>";
 							echo "<b>Contact:</b>" . $row ["contact"] . "<br>";
-							echo "<b>Email:</b>" . $row ["email"] . "<br>";
-							
+
+echo "<b>Email:</b>" . $row ["email"] . "<br>";
 						if(!empty($_SESSION["uid"]))
 									{
 										if(!empty($_SESSION["role"]))
