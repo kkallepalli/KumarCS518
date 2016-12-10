@@ -88,7 +88,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	color: #6b6b6b;
 }
 
-.error {
+.errorClass {
 	color: #FF0000;
 }
 
@@ -122,6 +122,30 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	width: 75%;
 }
 </style>
+<script type="text/javascript">
+$(document).ready(function(){
+	console.log("inside ready func");	
+	$('input[name="picpref"]').click(function() {
+		debugger;
+		uid = $("#profileLink").attr("userid");
+		picpref = $('input[name="picpref"]:checked').val();
+		var postData = "uid="+ uid+"&picpref="+picpref;
+		$.ajax({
+	        type: "post",
+	        url: "services/PicPref.php",
+	        data: postData,
+	        contentType: "application/x-www-form-urlencoded",
+	        success: function(responseData, textStatus, jqXHR) {
+				  location.reload();   
+			},
+	        error: function(jqXHR, textStatus, errorThrown) {
+	            alert("Error setting selecting image!! Try again");
+	            console.log(jqXHR+":"+errorThrown);
+	        }
+		});
+	});
+});
+</script>
 </head>
 <body>
 	<nav class="navbar navbar-inverse"
@@ -141,7 +165,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 					data-toggle='modal' data-target='#myPostModal'>Post</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
-				<li id='profileLink' style="cursor: hand; color: white;">
+				<li id='profileLink' userId=<?php echo $_SESSION["uid"]; ?> style="cursor: hand; color: white;">
 					<!-- Surbhi: Profile page --> <a data-toggle='modal'
 					data-target='#userModal' style='cursor: hand;'> Welcome,<?php echo $_SESSION["username"]; ?> </a>
 				</li>
@@ -155,7 +179,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 			<form action="#">
       	<?php
 						$conn = mysqli_connect ( DB_HOST, DB_USER, DB_PASSWORD, DB_NAME ) or die ( 'Could not connect to MySQL: ' . mysql_error () );
-						$sql = "SELECT uid, firstname, lastname, address, email, contact, username, password, upic, created_on FROM user where uid='" . $_GET["uid"] . "'";
+						$sql = "SELECT uid, firstname, lastname, address, email, contact, username, password, upic, pic_pref, created_on,IFNULL((select count(*) from question q where q.uid=". $_GET["uid"] ." and hide!=1),0) as totalquestions,IFNULL((select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=". $_GET["uid"] ."),0) as score FROM user where uid='" . $_GET["uid"] . "'";
 						if (! $conn) {
 							echo "error";
 						}
@@ -163,15 +187,46 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 								
 						$rs1 = mysqli_query ( $conn, $sql );
 						$x = 0;
+												
 						while ( $row = mysqli_fetch_assoc ( $rs1 ) ) {
-							if($row["upic"]!=NULL)
-								{
+							$email = $row["email"];
+							$d = 'wavatar';
+							$s = 80;
+							$r = 'g';
+										
+							$grav_url = "https://www.gravatar.com/avatar/";
+							$grav_url .= md5( strtolower( trim( $row["email"] ) ) );
+							$grav_url .= "?s=$s&d=$d&r=$r";
+							
+							$pic_pref =0;
+							$pic_pref = $row ["pic_pref"];
+							if($pic_pref == 0){
+								if($row["upic"]!=NULL){
 									$userpicpath="profiles/".$row["upic"];
 								}
+								else{
+									$userpicpath ="profiles/profile.png";
+								}
+							} else {
+								$userpicpath = $grav_url;
+							}							
 							echo "<b>First Name:</b>" . $row ["firstname"] . "<br>";
 							echo "<b>Last Name:</b>" . $row ["lastname"] . "<br>";
 							echo "<b>Address:</b>" . $row ["address"] . "<br>";
 							echo "<b>Contact:</b>" . $row ["contact"] . "<br>";
+							echo "<b>Email:</b>" . $row ["email"] . "<br>";
+							
+						if(!empty($_SESSION["uid"]))
+									{
+										if(!empty($_SESSION["role"]))
+										{
+											if($_SESSION["role"]==1)
+											{
+													echo "<b>Score : </b>" . $row ["score"] . "<br>";
+													echo "<b>Total Questions : </b>" . $row ["totalquestions"] . "<br>";
+											}
+										}
+									}
 						}
 			?>
       </form>
@@ -190,6 +245,18 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 				</div>
 
 			</form>
+			<?php
+			  if($pic_pref == 0){
+			  	echo '<label class="radio-inline"><input type="radio" name="picpref" value="1" >Gravatar Image</label>';
+			  	echo '<label class="radio-inline"><input type="radio" name="picpref" value="0" checked >Custom Avatar</label>';
+			  }else{
+			  	echo '<label class="radio-inline"><input type="radio" name="picpref" value="1" checked>Gravatar Image</label>';
+			  	echo '<label class="radio-inline"><input type="radio" name="picpref" value="0"  >Custom Avatar</label>';
+			  	echo "<script type='text/javascript'> $(document).ready(function(){ $('#image').hide();$('#updateBtn').hide();});</script>";
+			  	//echo "<script type='text/javascript'>$('#updateBtn').hide();</script>";
+			  }
+				
+			?>
 		</div>
 	</div>
 	
@@ -212,15 +279,30 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 							$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 							OR die ('Could not connect to MySQL: '.mysql_error());
 							
-							$sql = "SELECT Q.qid,qtitle,qcontent,U.upic,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc";
+							$sql = "SELECT Q.qid,qtitle,qcontent,U.upic,U.uid,created_date,U.username,U.email,U.pic_pref,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc";
 							$rs = mysqli_query ($conn,$sql );
 							$x = 0;
 							while ( $row = mysqli_fetch_assoc ( $rs ) ) {
+								
+								$email = $row["email"];
+								$d = 'mm';
+								$s = 80;
+								$r = 'g';
+											
+								$grav_url = "https://www.gravatar.com/avatar/";
+								$grav_url .= md5( strtolower( trim( $row["email"] ) ) );
+								$grav_url .= "?s=$s&d=$d&r=$r";
+								
+								$pic_pref =0;
+								$pic_pref = $row ["pic_pref"];
 								$picurl="profiles/profile.png";
-								if($row["upic"]!=NULL)
-								{
+								if(($pic_pref == 0)&&($row["upic"]!=NULL)){
 									$picurl="profiles/".$row["upic"];
+								} else {
+									$picurl = $grav_url;
 								}
+								
+								
 								$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;'><div class='row post'>
 								<div class='col-sm-7'>
 									<p class='title' style='cursor: hand;' data-toggle='collapse' data-target='#mycollapse" . ($x + 1) . "'>" . $row ["qtitle"] . "</p>
