@@ -7,7 +7,7 @@ $eventtype = $_REQUEST ["event"];
 if ($eventtype == 1) {
 	$qid = $_REQUEST ["qid"];
 	// answering a question
-	$sql = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=" . $uid . " and Q.qid in (select qid_fk from question_tag where tag_id_fk in (select tag_id_fk from question_tag where qid_fk=".$qid.") and qid_fk!=".$qid.")  and Q.qid not in(select qid from answers where uid_ans=" . $uid . ")";
+	$sql = "SELECT Q.qid,qtitle,qcontent,U.uid,created_date,U.username,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value FROM question Q,user U WHERE U.uid=Q.uid and U.uid!=" . $uid . " and Q.qid in (select distinct(qid_fk) from question_tag where tag_id_fk in (select tag_id_fk from question_tag where qid_fk=".$qid.") and qid_fk!=".$qid.")  and Q.qid not in(select qid from answers where uid_ans=" . $uid . ")";
 	$rs1 = mysqli_query($conn,$sql);
 	$x = 0;
 	while ( $row = mysqli_fetch_assoc ( $rs1 ) ) {
@@ -16,10 +16,13 @@ if ($eventtype == 1) {
 		<div class='col-sm-7'>
 			<p class='title' style='cursor: hand;' data-toggle='collapse' data-target='#reccollapse" . ($x + 1) . "' >" . $row ["qtitle"] . "</p>
 			<p id='myDesc".($x + 1)."'>".$row["qcontent"]."</p>";
-		if($row["tags"]!=null)
-		{
-			$postinfo = $postinfo ."<a href='#' style='background-color: #5bc0de;color:#ffffff;padding: 5px;'>".$row["tags"]."</a>";
-		}
+				
+				$sqltags="select * from tags where tag_id in (SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=".$row["qid"].")";
+				$rstags = mysqli_query($conn,$sqltags);
+					while ( $rsrow = mysqli_fetch_assoc ( $rstags ) ) {
+						$postinfo = $postinfo ."<a href='javascript:showTagQuestions(".$uid.",".$rsrow["tag_id"].",\"".$rsrow["tags"]."\")' style='background-color: #5bc0de;color:#ffffff;padding: 5px;margin-right:5px;'>".$rsrow["tags"]."</a>";
+					}
+					
 		$postinfo =	$postinfo."</div>
 		<div class='col-sm-2'>
 		Up: <span id='qVoteUp".$row["qid"]."' class='badge'>".$row["votesup"]."</span>
