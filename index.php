@@ -1455,8 +1455,8 @@ else if(!empty($_SESSION["userprofile"])  && $_SERVER ['REQUEST_METHOD'] == "POS
 							</div>
 							<div class="g-recaptcha" data-sitekey="6LfB0g0UAAAAAF_C8Kipa4HHwJy5UxrHi80ObYkW"></div>
 							<button type="submit" class="btn btn-default">Submit</button>
-							<a href="https://github.com/login/oauth/authorize?client_id=37f1064c2b0a36df69dd&redirect_uri=http://qav2.cs.odu.edu/kumar/KumarCS518/login.php&scope=user:email/" class="btn btn-primary">GITHUB Login</a>
-							<!-- <a href="https://github.com/login/oauth/authorize?client_id=3cb6030696f66392a6c1&redirect_uri=http://kkallepalli.cs518.cs.odu.edu/login.php&scope=user:email/" class="btn btn-primary">GITHUB Login</a> -->
+							<!--<a href="https://github.com/login/oauth/authorize?client_id=37f1064c2b0a36df69dd&redirect_uri=http://qav2.cs.odu.edu/kumar/KumarCS518/login.php&scope=user:email/" class="btn btn-primary">GITHUB Login</a> -->
+							 <a href="https://github.com/login/oauth/authorize?client_id=3cb6030696f66392a6c1&redirect_uri=http://kkallepalli.cs518.cs.odu.edu/login.php&scope=user:email/" class="btn btn-primary">GITHUB Login</a>
 						</form>
 					</div>
 					<div class="modal-footer"></div>
