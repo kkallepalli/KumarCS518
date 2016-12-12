@@ -38,7 +38,7 @@ echo "<script type='text/javascript'>showTopQuesPagination(".$pgno.",".$totalPag
 		$picurl="profiles/profile.png";
 		if(!empty($row["upic"]))
 		{
-			$picurl="profiles/".$row["upic"];
+			$picurl=$row["upic"];
 		}
 		if($row["pic_pref"]==1)
 		{
@@ -104,7 +104,7 @@ echo "<script type='text/javascript'>showTopQuesPagination(".$pgno.",".$totalPag
 				$picurl="profiles/profile.png";
 				if(!empty($arow["upic"]))
 				{
-					$picurl="profiles/".$arow["upic"];
+					$picurl=$arow["upic"];
 				}
 				if($arow["pic_pref"]==1)
 				{
@@ -132,7 +132,7 @@ echo "<script type='text/javascript'>showTopQuesPagination(".$pgno.",".$totalPag
 					$picurl="profiles/profile.png";
 					if(!empty($ansrow["upic"]))
 					{
-						$picurl="profiles/".$ansrow["upic"];
+						$picurl=$ansrow["upic"];
 					}
 					if($ansrow["pic_pref"]==1)
 					{

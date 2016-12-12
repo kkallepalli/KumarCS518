@@ -17,8 +17,8 @@ echo $_GET["code"];
 $url = 'https://github.com/login/oauth/access_token';
 
 $fields = array(
-		'client_id' => urlencode("3cb6030696f66392a6c1"),
-		'client_secret' => urlencode("e3688a8fe38f8880fed1a0c9a1784956ba089a10"),
+		'client_id' => urlencode("37f1064c2b0a36df69dd"),
+		'client_secret' => urlencode("19068fcaf8337b1e16b61f2674362fcdfe0714de"),
 		'code' => urlencode($_GET['code'])
 );
 
@@ -68,6 +68,7 @@ while ($row = mysqli_fetch_array($result)) {
 	$_SESSION["uid"]=$row["uid"];
 }
 
+echo "\n count:".$output["avatar_url"];
 if($count==0)
 {
 	$sql = "INSERT INTO user(username, password, created_on,role) VALUES ('".$output["login"]."','','".date("Y-m-d h:i:sa")."',0)";
@@ -80,6 +81,18 @@ if($count==0)
 		$_SESSION["uid"]=0;
 	}
 }
+else
+{
+	$sql = "update user set upic='".$output["avatar_url"]."' where uid=".$_SESSION["uid"];
+	if(mysqli_query($conn,$sql))
+	{
+		echo $sql;
+	}
+	else
+	{
+		echo $sql;
+	}
+}
 
 ?>
 <form id="myForm" action="./index.php" method="post">
@@ -87,4 +100,3 @@ if($count==0)
 <script type="text/javascript">
     document.getElementById('myForm').submit();
 </script>
-?>

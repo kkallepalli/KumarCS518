@@ -40,7 +40,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 			$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 			OR die ('Could not connect to MySQL: '.mysql_error());
 			
-			$sql="update user set upic='".$new_file_name."' where uid=".$_SESSION["uid"];
+			$sql="update user set upic='profiles/".$new_file_name."' where uid=".$_SESSION["uid"];
 			
 			if (mysqli_query($conn, $sql)) {
 				echo "<script>alert('Profile pic changed successfully!!');</script>";
@@ -201,7 +201,7 @@ $(document).ready(function(){
 							$pic_pref = $row ["pic_pref"];
 							if($pic_pref == 0){
 								if($row["upic"]!=NULL){
-									$userpicpath="profiles/".$row["upic"];
+									$userpicpath=$row["upic"];
 								}
 								else{
 									$userpicpath ="profiles/profile.png";
@@ -278,7 +278,7 @@ echo "<b>Email:</b>" . $row ["email"] . "<br>";
 							$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 							OR die ('Could not connect to MySQL: '.mysql_error());
 							
-							$sql = "SELECT Q.qid,qtitle,qcontent,U.upic,U.uid,created_date,U.username,U.email,U.pic_pref,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value,(select tags from tags where tag_id=(SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=Q.qid)) as tags FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc";
+							$sql = "SELECT Q.qid,qtitle,qcontent,U.upic,U.uid,created_date,U.username,U.email,U.pic_pref,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value FROM question Q,user U WHERE U.uid=Q.uid and U.uid=".$uid." order by value desc";
 							$rs = mysqli_query ($conn,$sql );
 							$x = 0;
 							while ( $row = mysqli_fetch_assoc ( $rs ) ) {
@@ -296,7 +296,7 @@ echo "<b>Email:</b>" . $row ["email"] . "<br>";
 								$pic_pref = $row ["pic_pref"];
 								$picurl="profiles/profile.png";
 								if(($pic_pref == 0)&&($row["upic"]!=NULL)){
-									$picurl="profiles/".$row["upic"];
+									$picurl=$row["upic"];
 								} else {
 									$picurl = $grav_url;
 								}
@@ -307,9 +307,10 @@ echo "<b>Email:</b>" . $row ["email"] . "<br>";
 									<p class='title' style='cursor: hand;' data-toggle='collapse' data-target='#mycollapse" . ($x + 1) . "'>" . $row ["qtitle"] . "</p>
 									<p id='qdescription".($x + 1)."'>".$row["qcontent"]."</p>";
 						
-								if($row["tags"]!=null)
-								{
-									$postinfo = $postinfo ."<a href='#' style='background-color: #5bc0de;color:#ffffff;padding: 5px;'>".$row["tags"]."</a>";
+							$sqltags="select * from tags where tag_id in (SELECT tag_id_fk FROM `question_tag` WHERE qid_fk=".$row["qid"].")";
+							$rstags = mysqli_query($conn,$sqltags);
+							while ( $rsrow = mysqli_fetch_assoc ( $rstags ) ) {
+									$postinfo = $postinfo ."<a href='javascript:showTagQuestions(".$uid.",".$rsrow["tag_id"].",\"".$rsrow["tags"]."\")' style='background-color: #5bc0de;color:#ffffff;padding: 5px;margin-right:5px;'>".$rsrow["tags"]."</a>";
 								}
 						
 								$postinfo = $postinfo ."</div>
@@ -320,7 +321,7 @@ echo "<b>Email:</b>" . $row ["email"] . "<br>";
 						  		</div>
 								<div id='mycollapse" . ($x + 1) . "' class='post-footer collapse'><div class='list-group'>";
 						
-								$sql2="SELECT A.aid,A.adesc,U.upic,U.username,A.best_ans,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"]." order by value desc";
+								$sql2="SELECT A.aid,A.adesc,U.upic,U.username,A.best_ans,pic_pref,email,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"]." order by value desc";
 								$rs2 = mysqli_query($conn,$sql2);
 								$bestansid=0;
 								$bestrow="";
@@ -329,15 +330,25 @@ echo "<b>Email:</b>" . $row ["email"] . "<br>";
 									$picurl="profiles/profile.png";
 									if(!empty($ansrow["upic"]))
 									{
-										$picurl="profiles/".$ansrow["upic"];
+										$picurl=$ansrow["upic"];
 									}
 									
 									if($arow["best_ans"]==1)
 									{
 										$bestansid=$arow["aid"];
 										$bestrow=$arow;
+										if($arow["pic_pref"]==1)
+										{
+											$d = 'wavatar';
+											$s = 80;
+											$r = 'g';
+										
+											$picurl = "https://www.gravatar.com/avatar/";
+											$picurl .= md5( strtolower( trim( $arow["email"] ) ) );
+											$picurl .= "?s=$s&d=$d&r=$r";
+										}
+										$bestrow["upic"]=$picurl;
 									}
-									$bestrow["upic"]=$picurl;
 								}
 								mysqli_data_seek($rs2,0);
 								$y = 0;
@@ -352,7 +363,17 @@ echo "<b>Email:</b>" . $row ["email"] . "<br>";
 										$picurl="profiles/profile.png";
 										if(!empty($ansrow["upic"]))
 										{
-											$picurl="profiles/".$ansrow["upic"];
+											$picurl=$ansrow["upic"];
+										}
+										if($ansrow["pic_pref"]==1)
+										{
+											$d = 'wavatar';
+											$s = 80;
+											$r = 'g';
+										
+											$picurl = "https://www.gravatar.com/avatar/";
+											$picurl .= md5( strtolower( trim( $ansrow["email"] ) ) );
+											$picurl .= "?s=$s&d=$d&r=$r";
 										}
 										
 										if($bestansid>0)

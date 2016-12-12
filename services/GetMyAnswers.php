@@ -43,7 +43,7 @@ while($arow= mysqli_fetch_assoc ( $rs2 ))
 	$picurl="profiles/profile.png";
 	if(!empty($ansrow["upic"]))
 	{
-		$picurl="profiles/".$ansrow["upic"];
+		$picurl=$ansrow["upic"];
 		if($arow["best_ans"]==1)
 		{
 			$bestansid=$arow["aid"];
@@ -77,7 +77,7 @@ while ( $ansrow = mysqli_fetch_assoc ( $rs2 ) ) {
 		$picurl="profiles/profile.png";
 		if(!empty($ansrow["upic"]))
 		{
-			$picurl="profiles/".$ansrow["upic"];
+			$picurl=$ansrow["upic"];
 		}
 		if($ansrow["pic_pref"]==1)
 		{

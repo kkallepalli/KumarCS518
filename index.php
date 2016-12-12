@@ -832,7 +832,7 @@ function peopleSearch()
 		<?php 
 		$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD,DB_NAME)
 		OR die ('Could not connect to MySQL: '.mysql_error());
-		$sql1 = "SELECT Q.qid,qtitle,qcontent,U.upic,U.uid,created_date,U.username,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value FROM question Q,user U WHERE U.uid=Q.uid order by value desc limit 5";
+		$sql1 = "SELECT Q.qid,qtitle,qcontent,U.upic,U.uid,created_date,U.username,pic_pref,email,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value FROM question Q,user U WHERE U.uid=Q.uid order by value desc limit 5";
 		if(!$conn)
 		{
 			echo "error";
@@ -843,7 +843,17 @@ function peopleSearch()
 			$picurl="profiles/profile.png";
 			if(!empty($row["upic"]))
 			{
-				$picurl="profiles/".$row["upic"];
+				$picurl=$row["upic"];
+			}
+			if($row["pic_pref"]==1)
+			{
+				$d = 'wavatar';
+				$s = 80;
+				$r = 'g';
+			
+				$picurl = "https://www.gravatar.com/avatar/";
+				$picurl .= md5( strtolower( trim( $row["email"] ) ) );
+				$picurl .= "?s=$s&d=$d&r=$r";
 			}
 			$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;' >
 		<div class='row post'>
@@ -960,7 +970,7 @@ function showTopPosts($uid) {
 		$picurl="profiles/profile.png";
 		if(!empty($row["upic"]))
 		{
-			$picurl="profiles/".$row["upic"];
+			$picurl=$row["upic"];
 		}
 		if($row["pic_pref"]==1)
 		{
@@ -1029,7 +1039,7 @@ function showTopPosts($uid) {
 				$picurl="profiles/profile.png";
 				if(!empty($arow["upic"]))
 				{
-					$picurl="profiles/".$arow["upic"];
+					$picurl=$arow["upic"];
 				}
 				if($arow["pic_pref"]==1)
 				{
@@ -1057,7 +1067,7 @@ function showTopPosts($uid) {
 					$picurl="profiles/profile.png";
 					if(!empty($ansrow["upic"]))
 					{
-						$picurl="profiles/".$ansrow["upic"];
+						$picurl=$ansrow["upic"];
 					}
 					if($ansrow["pic_pref"]==1)
 					{
@@ -1219,7 +1229,7 @@ else if(!empty($_SESSION["userprofile"])  && $_SERVER ['REQUEST_METHOD'] == "POS
 								$picurl="profiles/profile.png";
 								if(!empty($row["upic"]))
 								{
-									$picurl="profiles/".$row["upic"];
+									$picurl=$row["upic"];
 								}
 								if($row["pic_pref"]==1)
 								{
@@ -1294,7 +1304,7 @@ else if(!empty($_SESSION["userprofile"])  && $_SERVER ['REQUEST_METHOD'] == "POS
 										$picurl="profiles/profile.png";
 										if(!empty($ansrow["upic"]))
 										{
-											$picurl="profiles/".$ansrow["upic"];
+											$picurl=$ansrow["upic"];
 										}
 										if($arow["pic_pref"]==1)
 										{
@@ -1322,7 +1332,7 @@ else if(!empty($_SESSION["userprofile"])  && $_SERVER ['REQUEST_METHOD'] == "POS
 										$picurl="profiles/profile.png";
 										if(!empty($ansrow["upic"]))
 										{
-											$picurl="profiles/".$ansrow["upic"];
+											$picurl=$ansrow["upic"];
 										}
 										if($ansrow["pic_pref"]==1)
 										{
@@ -1445,8 +1455,8 @@ else if(!empty($_SESSION["userprofile"])  && $_SERVER ['REQUEST_METHOD'] == "POS
 							</div>
 							<div class="g-recaptcha" data-sitekey="6LfB0g0UAAAAAF_C8Kipa4HHwJy5UxrHi80ObYkW"></div>
 							<button type="submit" class="btn btn-default">Submit</button>
-							<!-- <a href="https://github.com/login/oauth/authorize?client_id=37f1064c2b0a36df69dd&redirect_uri=http://qav2.cs.odu.edu/kumar/KumarCS518/login.php&scope=user:email/" class="btn btn-primary">GITHUB Login</a> -->
-							<a href="https://github.com/login/oauth/authorize?client_id=3cb6030696f66392a6c1&redirect_uri=http://kkallepalli.cs518.cs.odu.edu/login.php&scope=user:email/" class="btn btn-primary">GITHUB Login</a>
+							<a href="https://github.com/login/oauth/authorize?client_id=37f1064c2b0a36df69dd&redirect_uri=http://qav2.cs.odu.edu/kumar/KumarCS518/login.php&scope=user:email/" class="btn btn-primary">GITHUB Login</a>
+							<!-- <a href="https://github.com/login/oauth/authorize?client_id=3cb6030696f66392a6c1&redirect_uri=http://kkallepalli.cs518.cs.odu.edu/login.php&scope=user:email/" class="btn btn-primary">GITHUB Login</a> -->
 						</form>
 					</div>
 					<div class="modal-footer"></div>
