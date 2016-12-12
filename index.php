@@ -949,7 +949,7 @@ function showTopPosts($uid) {
 	}
 	
 	echo "<script type='text/javascript'>showTopQuesPagination(".$pgno.",".$totalPages.",".$uid.");</script>";
-	$sql1 = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value FROM question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid!=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
+	$sql1 = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,pic_pref,email,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid and vote_ques=1) as votesup,(select count(*) from votes_ques where qid=Q.qid and vote_ques=-1) as votesdown,(select sum(vote_ques) from votes_ques where qid=Q.qid) as value FROM question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid!=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
 	if(!$conn)
 	{
 		echo "error";
@@ -961,6 +961,16 @@ function showTopPosts($uid) {
 		if(!empty($row["upic"]))
 		{
 			$picurl="profiles/".$row["upic"];
+		}
+		if($row["pic_pref"]==1)
+		{
+			$d = 'wavatar';
+			$s = 80;
+			$r = 'g';
+				
+			$picurl = "https://www.gravatar.com/avatar/";
+			$picurl .= md5( strtolower( trim( $row["email"] ) ) );
+			$picurl .= "?s=$s&d=$d&r=$r";
 		}
 		$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;' >
 		<div class='row post top-posts'>
@@ -1005,7 +1015,7 @@ function showTopPosts($uid) {
 		$postinfo =	$postinfo."<div id='collapse".($x + 1) ."' class='post-footer collapse'><div class='list-group'><div class='list-group-item row' style='margin:0px;'><a href='javascript:voteQuestion(1,".$row["qid"].")'><img width='24px' height='24px' src='./images/ques-up.png'></a>
 			<a href='javascript:voteQuestion(-1,".$row["qid"].")'><img width='24px' height='24px' src='./images/ques-down.png' ></a><ul id='topAnsPages".($x + 1)."' class='pagination' style='display: inline;'></ul></div>";
 		
-		$sql2="SELECT A.aid,A.adesc,U.upic,U.username,IFNULL((select count(*) from question q where q.uid=U.uid and hide!=1),0) as totalquestions,IFNULL((select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid),0) as score,A.best_ans,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"]." order by A.best_ans desc,value desc limit 0,5";
+		$sql2="SELECT A.aid,A.adesc,U.upic,U.username,pic_pref,email,IFNULL((select count(*) from question q where q.uid=U.uid and hide!=1),0) as totalquestions,IFNULL((select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid),0) as score,A.best_ans,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"]." order by A.best_ans desc,value desc limit 0,5";
 		$rs2 = mysqli_query($conn,$sql2);
 		$bestansid=0;
 		$bestrow="";
@@ -1015,13 +1025,24 @@ function showTopPosts($uid) {
 			{
 				$bestansid=$arow["aid"];
 				$bestrow=$arow;
+				
+				$picurl="profiles/profile.png";
+				if(!empty($arow["upic"]))
+				{
+					$picurl="profiles/".$arow["upic"];
+				}
+				if($arow["pic_pref"]==1)
+				{
+					$d = 'wavatar';
+					$s = 80;
+					$r = 'g';
+						
+					$picurl = "https://www.gravatar.com/avatar/";
+					$picurl .= md5( strtolower( trim($arow["email"] ) ) );
+					$picurl .= "?s=$s&d=$d&r=$r";
+				}
+				$bestrow["upic"]=$picurl;
 			}
-			$picurl="profiles/profile.png";
-			if(!empty($arow["upic"]))
-			{
-				$picurl="profiles/".$arow["upic"];
-			}
-			$bestrow["upic"]=$picurl;
 		}
 		mysqli_data_seek($rs2,0);
 		$y = 0;
@@ -1038,7 +1059,16 @@ function showTopPosts($uid) {
 					{
 						$picurl="profiles/".$ansrow["upic"];
 					}
-					
+					if($ansrow["pic_pref"]==1)
+					{
+						$d = 'wavatar';
+						$s = 80;
+						$r = 'g';
+							
+						$picurl = "https://www.gravatar.com/avatar/";
+						$picurl .= md5( strtolower( trim($ansrow["email"] ) ) );
+						$picurl .= "?s=$s&d=$d&r=$r";
+					}
 					$postinfo = $postinfo . "<div class='list-group-item row' style='margin:0px;'><div class='col-sm-6'>".html_entity_decode($ansrow["adesc"])."</div><div class='col-sm-2'><img src='".$picurl."' width='50px' height='50px'  class='img-circle img-responsive'' ><b>".$ansrow["username"]."[".$ansrow["score"]."<span class='adminonly'>,".$ansrow["totalquestions"]."</span>]</b></div><div class='col-sm-1'><span id='qAnsUp".$ansrow["aid"]."'>".$ansrow["upvotes"]."</span><img width='24px' height='24px' src='./images/thumb-up-outline.png' onclick='voteAnswer(1,".$ansrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div><div class='col-sm-1'><span id='qAnsDown".$bestrow["aid"]."'>".$ansrow["downvotes"]."</span><img width='24px' height='24px' src='./images/thumb-down-outline.png' onclick='voteAnswer(-1,".$ansrow["aid"].",".$row["qid"].")' style='cursor:hand;'></div></div>";
 				}
 			}
@@ -1058,8 +1088,8 @@ function showTopPosts($uid) {
 }
 // user login code
 if ($_SERVER ['REQUEST_METHOD'] == "POST") {
-	
-	if(empty($_SESSION["username"]))
+
+	if(empty($_SESSION["userprofile"]) && $_SESSION["loginstatus"]!="success")
 	{
 		echo "<span id='gcOutput' style='display:none'>";
 		$url = 'https://www.google.com/recaptcha/api/siteverify';
@@ -1113,6 +1143,7 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 			$_SESSION["username"]=$row["username"];
 			$_SESSION["uid"]=$row["uid"];
 			$_SESSION["role"]=$row["role"];
+			$_SESSION["loginstatus"]="success";
 			echo "<script type='text/javascript'>uname=" . $uid . ";showLogout();</script>";
 			showTopPosts($uid);
 			echo "<script type='text/javascript'>document.getElementById('profileHref').href='./profile.php?uid=". $uid . "';</script>";
@@ -1181,7 +1212,7 @@ else if(!empty($_SESSION["userprofile"])  && $_SERVER ['REQUEST_METHOD'] == "POS
 							
 							echo "<script type='text/javascript'>showMyQuesPagination(".$pgno.",".$totalPages.",".$uid.");</script>";
 							
-							$sql = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value FROM question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
+							$sql = "SELECT Q.qid,qtitle,qcontent,freeze,U.upic,U.uid,created_date,U.username,pic_pref,email,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from answers where qid=Q.qid) as answers,(select count(*) from votes_ques where qid=Q.qid) as votes,IFNULL((select sum(vote_ques) from votes_ques where qid=Q.qid),0) as value FROM question Q,user U WHERE U.uid=Q.uid and Q.hide!=1 and U.uid=".$uid." order by value desc LIMIT ".(($pgno-1)*5).",5";
 							$rs = mysqli_query ($conn,$sql );					
 							$x = 0;
 							while ( $row = mysqli_fetch_assoc ( $rs ) ) {
@@ -1189,6 +1220,16 @@ else if(!empty($_SESSION["userprofile"])  && $_SERVER ['REQUEST_METHOD'] == "POS
 								if(!empty($row["upic"]))
 								{
 									$picurl="profiles/".$row["upic"];
+								}
+								if($row["pic_pref"]==1)
+								{
+									$d = 'wavatar';
+									$s = 80;
+									$r = 'g';
+									
+									$picurl = "https://www.gravatar.com/avatar/";
+									$picurl .= md5( strtolower( trim( $row["email"] ) ) );
+									$picurl .= "?s=$s&d=$d&r=$r";
 								}
 								$postinfo = "<div class='w3-card-2 w3-hover-shadow' style='border-left: 4px solid #009688;'><div class='row post'>
 								<div class='col-sm-7'>
@@ -1240,24 +1281,33 @@ else if(!empty($_SESSION["userprofile"])  && $_SERVER ['REQUEST_METHOD'] == "POS
 						  		</div><div id='myansSection".($x + 1)."'>
 								<div id='mycollapse" . ($x + 1) . "' class='post-footer collapse'><div class='list-group'><div class='list-group-item row' style='margin:0px;'><ul id='myAnsPages".($x + 1)."' class='pagination' style='display: inline;'></ul></div>";
 						
-								$sql2="SELECT A.aid,A.adesc,U.upic,U.username,A.best_ans,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"]." order by A.best_ans desc,value desc limit 0,5";
+								$sql2="SELECT A.aid,A.adesc,U.upic,U.username,A.best_ans,pic_pref,email,(select count(*) from question q where q.uid=U.uid and hide!=1) as totalquestions,(select sum(vote_ques) from user u,question q,votes_ques v where u.uid=q.uid and q.qid=v.qid and u.uid=U.uid) as score,(select count(*) from votes_ans where aid=A.aid and vote_ans=1) as upvotes,(select count(*) from votes_ans where aid=A.aid and vote_ans=-1) as downvotes,IFNULL((select sum(vote_ans) from votes_ans where aid=A.aid),0) as value FROM answers A,user U WHERE U.uid=A.uid_ans and A.qid=".$row["qid"]." order by A.best_ans desc,value desc limit 0,5";
 								$rs2 = mysqli_query($conn,$sql2);
 								$bestansid=0;
 								$bestrow="";
 								while($arow= mysqli_fetch_assoc ( $rs2 ))
 								{
-									$picurl="profiles/profile.png";
-									if(!empty($ansrow["upic"]))
-									{
-										$picurl="profiles/".$ansrow["upic"];
-									}
-									
 									if($arow["best_ans"]==1)
 									{
 										$bestansid=$arow["aid"];
 										$bestrow=$arow;
+										$picurl="profiles/profile.png";
+										if(!empty($ansrow["upic"]))
+										{
+											$picurl="profiles/".$ansrow["upic"];
+										}
+										if($arow["pic_pref"]==1)
+										{
+											$d = 'wavatar';
+											$s = 80;
+											$r = 'g';
+												
+											$picurl = "https://www.gravatar.com/avatar/";
+											$picurl .= md5( strtolower( trim( $arow["email"] ) ) );
+											$picurl .= "?s=$s&d=$d&r=$r";
+										}
+										$bestrow["upic"]=$picurl;
 									}
-									$bestrow["upic"]=$picurl;
 								}
 								mysqli_data_seek($rs2,0);
 								$y = 0;
@@ -1274,6 +1324,17 @@ else if(!empty($_SESSION["userprofile"])  && $_SERVER ['REQUEST_METHOD'] == "POS
 										{
 											$picurl="profiles/".$ansrow["upic"];
 										}
+										if($ansrow["pic_pref"]==1)
+										{
+											$d = 'wavatar';
+											$s = 80;
+											$r = 'g';
+										
+											$picurl = "https://www.gravatar.com/avatar/";
+											$picurl .= md5( strtolower( trim( $ansrow["email"] ) ) );
+											$picurl .= "?s=$s&d=$d&r=$r";
+										}
+										
 										
 										if($bestansid>0)
 										{

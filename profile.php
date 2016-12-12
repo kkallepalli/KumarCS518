@@ -126,7 +126,6 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 $(document).ready(function(){
 	console.log("inside ready func");	
 	$('input[name="picpref"]').click(function() {
-		debugger;
 		uid = $("#profileLink").attr("userid");
 		picpref = $('input[name="picpref"]:checked').val();
 		var postData = "uid="+ uid+"&picpref="+picpref;
