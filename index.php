@@ -93,7 +93,7 @@ div.searchResults {
     
 }
 </style>
- <script>tinymce.init({ selector:'textarea',plugins : 'image',  file_browser_callback: function(field_name, url, type, win) {
+ <script>tinymce.init({ selector:'textarea',plugins : 'image,bbcode,paste',  paste_as_text: true, file_browser_callback: function(field_name, url, type, win) {
 	$("#mceUpload").val(field_name);
      if(type=='image') $('#my_form input').click();
  } });</script>
@@ -144,6 +144,7 @@ function setUploadName(fieldname,fname){
 
 function createPost()
 {
+	tinyMCE.triggerSave();
 	if($("#postTitle").val()=='' || $("#postTitle").val()==null || tinymce.get('postContent').getBody().innerHTML=="" || tinymce.get('postContent').getBody().innerHTML==null )
 	{
 		alert("Post Title & content cannot be empty : "+$("#tags").val());

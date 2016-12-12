@@ -5,7 +5,7 @@ OR die ('Could not connect to MySQL: '.mysql_error());
 $qid=0;
 if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	$title=htmlentities($_POST["title"]);
-	$content=$_POST["content"];
+	$content=mysqli_real_escape_string($conn,$_POST["content"]);
 	$tags=htmlentities($_POST["tags"]);
 	$uid=$_POST["uname"];
 	$sql = "INSERT INTO question(qtitle, qcontent, uid, created_date, views) VALUES ('".$title."','".$content."',".$uid.",'".date("Y-m-d h:i:sa ")."',0)";
