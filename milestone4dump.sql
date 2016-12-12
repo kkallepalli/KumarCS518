@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Dec 11, 2016 at 06:21 PM
+-- Generation Time: Dec 12, 2016 at 01:21 PM
 -- Server version: 10.0.19-MariaDB-1~trusty-log
 -- PHP Version: 5.5.9-1ubuntu4.9
 
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `answers` (
   `uid_ans` int(11) NOT NULL,
   `answered_date` date NOT NULL,
   `best_ans` tinyint(1) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `answers`
@@ -85,7 +85,11 @@ INSERT INTO `answers` (`aid`, `adesc`, `qid`, `uid_ans`, `answered_date`, `best_
 (63, '&lt;p&gt;tiny MCE &lt;strong&gt;test&lt;/strong&gt; 1&lt;/p&gt;', 10, 1, '2016-11-16', 0),
 (64, '<p>Tiny mce <strong><em>test</em> </strong>2</p>', 10, 1, '2016-11-16', 0),
 (65, '<p><strong>pagination</strong> test</p>', 2, 2, '2016-11-21', 0),
-(66, '<p><img src="http://city4.xn--e1akkdfpb6a.xn--p1ai/images1/visakhapatnam-india-5.jpg" alt="" width="665" height="514" /></p>', 2, 2, '2016-11-21', 0);
+(66, '<p><img src="http://city4.xn--e1akkdfpb6a.xn--p1ai/images1/visakhapatnam-india-5.jpg" alt="" width="665" height="514" /></p>', 2, 2, '2016-11-21', 0),
+(68, '&lt;p&gt;this is a ', 23, 17, '2016-12-12', 0),
+(69, '&lt;p&gt;this is a ', 23, 17, '2016-12-12', 0),
+(70, '<p>this is a ', 23, 17, '2016-12-12', 0),
+(75, '&lt;p&gt;this is a ', 23, 17, '2016-12-12', 0);
 
 -- --------------------------------------------------------
 
@@ -229,34 +233,34 @@ CREATE TABLE IF NOT EXISTS `user` (
   `pic_pref` tinyint(1) NOT NULL DEFAULT '0',
   `created_on` date DEFAULT NULL,
   `role` int(11) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=90 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=91 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `user`
 --
 
 INSERT INTO `user` (`uid`, `firstname`, `lastname`, `address`, `email`, `contact`, `username`, `password`, `upic`, `pic_pref`, `created_on`, `role`) VALUES
-(1, 'Kumar', 'Kallepalli', 'Norfolk, VA', 'kkall002@odu.edu', '7072171427', 'kkall002@odu.edu', '1234', '1.jpg', 1, '2016-09-20', 0),
-(2, 'Admin', 'admin', 'Norfolk, VA', 'admin@xyz.com', '123-234-34', 'admin', 'cs518pa$$', '2.png', 0, NULL, 1),
+(1, 'Kumar', 'Kallepalli', 'Norfolk, VA', 'kkall002@odu.edu', '7072171427', 'kkall002@odu.edu', '1234', 'profiles/1.jpg', 0, '2016-09-20', 0),
+(2, 'Admin', 'admin', 'Norfolk, VA', 'admin@xyz.com', '123-234-34', 'admin', 'cs518pa$$', 'profiles/2.png', 0, NULL, 1),
 (3, 'Justin', 'Brunelle', 'Norfolk, VA', 'jbrun@xyz.com', '342458697', 'jbrunelle', 'M0n@rch$', NULL, 0, NULL, 0),
-(4, 'Peter', 'Venkman', 'Norfolk, VA', 'pven@xyz.com', '343453466', 'pvenkman', 'imadoctor', '4.jpg', 0, NULL, 0),
-(5, 'Ray', 'stantz', 'Norfolk, VA', 'rstan@xyz.com', '756756645', 'rstantz', '"; INSERT INTO Customers (CustomerName,Address,City) Values(@0,@1,@2); --', '5.jpg', 0, NULL, 0),
-(6, 'Dana', 'Barrett', 'Norfolk, VA', 'dbar@xyz.com', '977565645', 'dbarrett', 'fr1ed3GGS', '6.jpg', 0, NULL, 0),
-(7, 'Louis', 'tully', 'Norfolk, VA', 'ltul@xyz.com', '5656454343', 'ltully', '1234', '7.jpg', 0, NULL, 0),
-(8, 'Egon ', 'Spengler', 'Norfolk, VA', 'espen@xyz.com', '4564564564', 'espengler', 'don''t cross the streams', '8.jpg', 0, NULL, 0),
-(9, 'Janine ', 'Melnitz', 'Norfolk, VA', 'jmel@xyz.com', '6456454578', 'janine', '--!drop tables;', '9.jpg', 0, NULL, 0),
-(10, 'Winston ', 'Zeddemore', 'Norfolk, VA', 'wzed@xyz.com', '367786655', 'winston', 'zeddM0r3', '10.jpg', 0, NULL, 0),
+(4, 'Peter', 'Venkman', 'Norfolk, VA', 'pven@xyz.com', '343453466', 'pvenkman', 'imadoctor', 'profiles/4.jpg', 0, NULL, 0),
+(5, 'Ray', 'stantz', 'Norfolk, VA', 'rstan@xyz.com', '756756645', 'rstantz', '"; INSERT INTO Customers (CustomerName,Address,City) Values(@0,@1,@2); --', 'profiles/5.jpg', 0, NULL, 0),
+(6, 'Dana', 'Barrett', 'Norfolk, VA', 'dbar@xyz.com', '977565645', 'dbarrett', 'fr1ed3GGS', 'profiles/6.jpg', 0, NULL, 0),
+(7, 'Louis', 'tully', 'Norfolk, VA', 'ltul@xyz.com', '5656454343', 'ltully', '1234', 'profiles/7.jpg', 0, NULL, 0),
+(8, 'Egon ', 'Spengler', 'Norfolk, VA', 'espen@xyz.com', '4564564564', 'espengler', 'don''t cross the streams', 'profiles/8.jpg', 0, NULL, 0),
+(9, 'Janine ', 'Melnitz', 'Norfolk, VA', 'jmel@xyz.com', '6456454578', 'janine', '--!drop tables;', 'profiles/9.jpg', 0, NULL, 0),
+(10, 'Winston ', 'Zeddemore', 'Norfolk, VA', 'wzed@xyz.com', '367786655', 'winston', 'zeddM0r3', 'profiles/10.jpg', 0, NULL, 0),
 (11, 'gozer', 'gozer', 'Norfolk, VA', 'gozer@xyz.com', '7455656454', 'gozer', 'd3$truct0R', NULL, 0, NULL, 0),
 (12, 'slimer', 'slimer', 'Norfolk, VA', 'slimer@xyz.com', '7566453453', 'slimer', 'f33dM3', NULL, 0, NULL, 0),
 (13, 'Zuul', 'Zuul', 'Norfolk, VA', 'zuul@xyz.com', '365767454', 'zuul', '105"; DROP TABLE', NULL, 0, NULL, 0),
 (14, 'keymaster', 'keymaster', 'Norfolk, VA', 'keymas@xyz.com', '423547345', 'keymaster', 'n0D@na', NULL, 0, NULL, 0),
 (15, 'gatekeeper', 'gatekeeper', 'Norfolk, VA', 'gatek@xyz.com', '7567238348', 'gatekeeper', '$l0r', NULL, 0, NULL, 0),
 (16, 'Stay', 'Puft', 'Norfolk, VA', 'stayp@xyz.com', '723739843', 'staypuft', 'm@r$hM@ll0w', NULL, 0, NULL, 0),
-(17, 'Satya', 'Narayan', 'Norfolk, VA', 'satya.aquarian@gmail.com', '7575757575', 'satya', 'pass123', '17.jpg', 1, '2016-10-19', 0),
+(17, 'Satya', 'Narayan', 'Norfolk, VA', 'satya.aquarian@gmail.com', '7575757575', 'satya', 'pass123', 'profiles/17.jpg', 1, '2016-10-19', 0),
 (50, 'Maheedhar', 'Gunnam', 'Norfolk, VA', 'getreadytomail@gmail.com', '956389456', 'maheedhar', '1234', NULL, 1, '2016-10-21', 0),
 (55, 'Deepthi', 'Lakshminarayana', 'Norfolk, VA', 'deepthi@xyz.com', '784548743', 'Deepthi', '1234', NULL, 0, '2016-10-21', 0),
-(86, 'Surbhi', 'Shankar', 'Norfolk, VA', 'abc@xyz.com', '123-234-34', 'sshankar', 'abcd', '86.jpg', 0, '2016-10-24', 0),
-(89, NULL, NULL, NULL, NULL, NULL, 'kkallepalli', '', NULL, 0, '2016-12-06', 0);
+(86, 'Surbhi', 'Shankar', 'Norfolk, VA', 'abc@xyz.com', '123-234-34', 'sshankar', 'abcd', 'profiles/86.jpg', 0, '2016-10-24', 0),
+(89, NULL, NULL, NULL, NULL, NULL, 'kkallepalli', '', 'https://avatars.githubusercontent.com/u/22042508?v=3', 0, '2016-12-06', 0);
 
 -- --------------------------------------------------------
 
@@ -270,7 +274,7 @@ CREATE TABLE IF NOT EXISTS `votes_ans` (
   `vote_ans` int(10) NOT NULL,
   `aid` int(10) NOT NULL,
   `vote_ans_uid` int(10) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `votes_ans`
@@ -310,7 +314,7 @@ CREATE TABLE IF NOT EXISTS `votes_ques` (
   `vote_ques` int(10) NOT NULL,
   `qid` int(10) NOT NULL,
   `vote_ques_uid` int(10) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `votes_ques`
@@ -324,7 +328,6 @@ INSERT INTO `votes_ques` (`vid_ques`, `vote_ques`, `qid`, `vote_ques_uid`) VALUE
 (16, 1, 10, 10),
 (18, 1, 9, 7),
 (21, -1, 12, 7),
-(23, 1, 10, 1),
 (24, 1, 6, 1),
 (26, 1, 10, 17),
 (27, 1, 2, 17),
@@ -332,7 +335,8 @@ INSERT INTO `votes_ques` (`vid_ques`, `vote_ques`, `qid`, `vote_ques_uid`) VALUE
 (32, 1, 14, 17),
 (34, 1, 6, 17),
 (35, 1, 3, 17),
-(36, 1, 14, 1);
+(36, 1, 14, 1),
+(38, 1, 10, 1);
 
 --
 -- Indexes for dumped tables
@@ -398,7 +402,7 @@ ALTER TABLE `votes_ques`
 -- AUTO_INCREMENT for table `answers`
 --
 ALTER TABLE `answers`
-  MODIFY `aid` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=68;
+  MODIFY `aid` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=76;
 --
 -- AUTO_INCREMENT for table `question`
 --
@@ -413,17 +417,17 @@ ALTER TABLE `tags`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=90;
+  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=91;
 --
 -- AUTO_INCREMENT for table `votes_ans`
 --
 ALTER TABLE `votes_ans`
-  MODIFY `vid_ans` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=44;
+  MODIFY `vid_ans` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=45;
 --
 -- AUTO_INCREMENT for table `votes_ques`
 --
 ALTER TABLE `votes_ques`
-  MODIFY `vid_ques` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=37;
+  MODIFY `vid_ques` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=39;
 --
 -- Constraints for dumped tables
 --
