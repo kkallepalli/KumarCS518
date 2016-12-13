@@ -71,8 +71,30 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet"
 	href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <style type="text/css">
+<style>
+
+  .bar{
+    fill: white;
+  }
+
+  .bar:hover{
+    fill: brown;
+  }
+
+	.axis {
+	  font: 10px sans-serif;
+	}
+
+	.axis path,
+	.axis line {
+	  fill: none;
+	  stroke: #000;
+	  shape-rendering: crispEdges;
+	}
+	
 .title {
 	color: grey;
 	font-weight: bold;
@@ -123,6 +145,115 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 }
 </style>
 <script type="text/javascript">
+
+function getChartData(uid)
+{
+	$.ajax({
+        type: "get",
+        url: "services/MyDashboard.php?uid="+uid,
+        contentType: "application/json",
+        success: function(responseData, textStatus, jqXHR) {
+            showChart(responseData);
+		},
+        error: function(jqXHR, textStatus, errorThrown) {
+        }
+	});
+}
+
+function showChart(data)
+{
+	var newdata = [];
+	var results = d3.map( JSON.parse(data) );
+    results.forEach( function( key, val ) {
+        if(key=="qcount")
+        {
+			key="Questions";
+           }
+        else  if(key=="acount")
+        {
+			key="Answered";
+           }
+        else if(key=="bcount")
+        {
+			key="Best Answers";
+           }
+        var result = {"count":parseInt(val),"label":key};
+        newdata.push( result );
+    } );
+
+    console.log(newdata);
+	
+	var margin = {top: 20, right: 20, bottom: 70, left: 40},
+    width = 300 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+
+// set the ranges
+var x = d3.scale.ordinal().rangeRoundBands([0, width], .5);
+
+var y = d3.scale.linear().range([height, 0]);
+
+// define the axis
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .ticks(10);
+
+
+// add the SVG element
+var svg = d3.select("#myStats").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", 
+          "translate(" + margin.left + "," + margin.top + ")");
+	
+  // scale the range of the data
+  x.domain(newdata.map(function(d) { return d.label; }));
+  y.domain([0, d3.max(newdata, function(d) { return d.count; })]);
+
+  // add axis
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+    .selectAll("text")
+      .style("text-anchor", "end")
+      .attr("dx", "-.8em")
+      .attr("dy", "-.55em")
+      .attr("transform", "rotate(-90)" );
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 5)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Frequency");
+
+
+  // Add bar chart
+	svg.selectAll("bar")
+      .data(newdata)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("style","fill:steelblue")
+      .attr("x", function(d) { return x(d.label); })
+      .attr("width", x.rangeBand())
+      .transition().delay(function (d,i){ return i * 600;})
+	   .duration(800)
+	  .attr("y", function(d) { return y(d.count); })
+      .attr("height", function(d) { return height - y(d.count); }) ;
+}
+
+
 $(document).ready(function(){
 	console.log("inside ready func");	
 	$('input[name="picpref"]').click(function() {
@@ -260,7 +391,7 @@ echo "<b>Email:</b>" . $row ["email"] . "<br>";
 	</div>
 	
 	<div class="row" style="margin:0px;">
-	<div class="col-sm-12">
+	<div class="col-sm-6">
 	<?php
 		if($_SESSION["uid"]==$_GET["uid"])
 		{
@@ -395,8 +526,19 @@ echo "<b>Email:</b>" . $row ["email"] . "<br>";
 						}
 					}
 						showMyPosts();
+						echo "<script>getChartData(".$_SESSION["uid"].")</script>";
 					?>
 	</div>
+		<div class="col-sm-6">
+		    <div class="panel panel-info">
+			      <div class="panel-heading">User Statistics</div>
+			      <div class="panel-body">	
+			      	<div id="myStats">
+					</div>
+				</div>
+   			 </div>
+			
+		</div>
 	</div>
 	
 	
