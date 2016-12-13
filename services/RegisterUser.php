@@ -21,14 +21,14 @@ if ($_SERVER ['REQUEST_METHOD'] == "POST") {
 	
 	 if($count==0)
 	{
-		$sql = "INSERT INTO user(username, password,email, created_on) VALUES ('".$username."','".$password."','".$email."',".date("Y-m-d h:i:sa")."')";
+		$sql = "INSERT INTO user(username, password,email,created_on,pic_pref,role) VALUES ('".$username."','".$password."','".$email."','".date("Y-m-d h:i:sa")."',0,0)";
 		if(mysqli_query($conn,$sql))
 		{
 			$uid=mysqli_insert_id($conn);
 			echo $uid;
 		}
 		else {
-			echo "error-Error in user creation";
+			echo $sql;
 		}
 	}
 	else {

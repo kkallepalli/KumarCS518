@@ -120,6 +120,7 @@ function regUser()
           data: postData,
           contentType: "application/x-www-form-urlencoded",
           success: function(responseData, textStatus, jqXHR) {
+              console.log(responseData);
               if(responseData.split("-")[0]=="error")
               {
             	  alert(responseData.split("-")[1]);
