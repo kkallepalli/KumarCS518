@@ -109,11 +109,11 @@ var userId=1;
 /* Satya: Code for user registration: */
 function regUser()
 {
-	if ($("#newUserId").val() == "" || $("#newUserPw").val() == "") {
-		alert ("Username & Password is mandatory");
+	if ($("#newUserId").val() == "" || $("#newUserPw").val() == "" || $("#newUseremail").val() == "") {
+		alert ("Username & Password & email is mandatory");
 	} else {
 				
-	var postData = "&username="+$("#newUserId").val()+"&password="+$("#newUserPw").val();
+	var postData = "&username="+$("#newUserId").val()+"&password="+$("#newUserPw").val()+"&email="+$("#newUseremail").val();
     $.ajax({
           type: "post",
           url: "services/RegisterUser.php",
@@ -1416,8 +1416,12 @@ else if(!empty($_SESSION["userprofile"])  && $_SERVER ['REQUEST_METHOD'] == "POS
 					</div>
 					<div class="modal-body">
 					       	<div class="form-group">
-								<label for="email">Email address/User Name:<span style="color: red;">*</span></label> <input type="text"
+								<label for="email">User Name:<span style="color: red;">*</span></label> <input type="text"
 									class="form-control" name="newUserId" id="newUserId" required>
+							</div>
+							<div class="form-group">
+								<label for="email">Email address<span style="color: red;">*</span></label> <input type="text"
+									class="form-control" name="newUseremail" id="newUseremail" required>
 							</div>
 							<div class="form-group">
 								<label for="pwd">Password:<span style="color: red;">*</span></label> <input type="password"
